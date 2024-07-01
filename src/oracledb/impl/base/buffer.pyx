@@ -507,9 +507,9 @@ cdef class Buffer:
         if preferred_num_type == NUM_TYPE_INT and is_integer:
             return int(buf[:num_bytes])
         elif preferred_num_type == NUM_TYPE_DECIMAL:
-            return PY_TYPE_DECIMAL(buf[:num_bytes].decode())
+            return PY_TYPE_DECIMAL(buf[:num_bytes].decode(get_encoding(), get_encoding_errors()))
         elif preferred_num_type == NUM_TYPE_STR:
-            return buf[:num_bytes].decode()
+            return buf[:num_bytes].decode(get_encoding(), get_encoding_errors())
         return float(buf[:num_bytes])
 
     cdef object read_binary_double(self):
@@ -730,7 +730,7 @@ cdef class Buffer:
         self._pos = end_pos + 1
         return self._data[start_pos:self._pos]
 
-    cdef object read_str(self, int csfrm, const char* encoding_errors=NULL):
+    cdef object read_str(self, int csfrm, str encoding_errors=None):
         """
         Reads bytes from the buffer and decodes them into a string following
         the supplied character set form.
@@ -740,8 +740,10 @@ cdef class Buffer:
             ssize_t num_bytes
         self.read_raw_bytes_and_length(&ptr, &num_bytes)
         if ptr != NULL:
+            if not encoding_errors:
+                encoding_errors = get_encoding_errors()
             if csfrm == CS_FORM_IMPLICIT:
-                return ptr[:num_bytes].decode(ENCODING_UTF8, encoding_errors)
+                return ptr[:num_bytes].decode(get_encoding(), encoding_errors)
             return ptr[:num_bytes].decode(ENCODING_UTF16, encoding_errors)
 
     cdef int read_ub1(self, uint8_t *value) except -1:
@@ -1202,7 +1204,7 @@ cdef class Buffer:
         """
         Writes a string to the buffer as UTF-8 encoded bytes.
         """
-        self.write_bytes(value.encode())
+        self.write_bytes(value.encode(get_encoding(), get_encoding_errors()))
 
     cdef int write_uint8(self, uint8_t value) except -1:
         """

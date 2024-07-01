@@ -54,6 +54,7 @@ import re
 import secrets
 import ssl
 import sys
+import codecs
 
 cydatetime.import_datetime()
 
@@ -89,6 +90,27 @@ cdef int get_preferred_num_type(int16_t precision, int8_t scale):
         return NUM_TYPE_INT
     return NUM_TYPE_FLOAT
 
+cdef str _encoding = "UTF-8"
+cdef str _encoding_errors = "strict"
+
+def set_encoding(encoding, errors = "replace"):
+    global _encoding, _encoding_errors
+    codecs.lookup(encoding)
+    _encoding = encoding
+    if errors in ("strict", "ignore", "replace"):
+        _encoding_errors = errors
+
+cdef str get_encoding():
+    return _encoding
+
+cdef str get_encoding_errors():
+    return _encoding_errors
+
+def get_encoding():
+    return _encoding
+
+def get_encoding_errors():
+    return _encoding_errors
 
 include "impl/base/constants.pxi"
 include "impl/base/defaults.pyx"

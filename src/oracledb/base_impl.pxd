@@ -250,7 +250,7 @@ cdef class Buffer:
     cdef int read_sb4(self, int32_t *value) except -1
     cdef int read_sb8(self, int64_t *value) except -1
     cdef bytes read_null_terminated_bytes(self)
-    cdef object read_str(self, int csfrm, const char* encoding_errors=*)
+    cdef object read_str(self, int csfrm, str encoding_errors=*)
     cdef int read_ub1(self, uint8_t *value) except -1
     cdef int read_ub2(self, uint16_t *value) except -1
     cdef int read_ub4(self, uint32_t *value) except -1
@@ -792,3 +792,5 @@ cdef void pack_uint32(char_type *buf, uint32_t x, int order)
 cdef void pack_uint64(char_type *buf, uint64_t x, int order)
 cdef uint16_t unpack_uint16(const char_type *buf, int order)
 cdef uint32_t unpack_uint32(const char_type *buf, int order)
+cdef str get_encoding()
+cdef str get_encoding_errors()

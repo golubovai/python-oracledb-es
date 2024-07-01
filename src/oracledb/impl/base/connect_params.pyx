@@ -246,7 +246,7 @@ cdef class ConnectParamsImpl:
         Return a byte array suitable for obfuscating the specified secret
         value.
         """
-        return bytearray(secrets.token_bytes(len(secret_value.encode())))
+        return bytearray(secrets.token_bytes(len(secret_value.encode(get_encoding(), get_encoding_errors()))))
 
     cdef bytes _get_password(self):
         """
@@ -262,7 +262,7 @@ cdef class ConnectParamsImpl:
         """
         if self._private_key is not None:
             return self._xor_bytes(self._private_key,
-                                   self._private_key_obfuscator).decode()
+                                   self._private_key_obfuscator).decode(get_encoding(), get_encoding_errors())
 
     cdef str _get_token(self):
         """
@@ -293,7 +293,7 @@ cdef class ConnectParamsImpl:
             expired = self.access_token_expires < current_date
         if expired:
             errors._raise_err(errors.ERR_EXPIRED_ACCESS_TOKEN)
-        return self._xor_bytes(self._token, self._token_obfuscator).decode()
+        return self._xor_bytes(self._token, self._token_obfuscator).decode(get_encoding(), get_encoding_errors())
 
     cdef object _get_token_expires(self, str token):
         """
@@ -316,7 +316,7 @@ cdef class ConnectParamsImpl:
         """
         if self._wallet_password is not None:
             return self._xor_bytes(self._wallet_password,
-                                   self._wallet_password_obfuscator).decode()
+                                   self._wallet_password_obfuscator).decode(get_encoding(), get_encoding_errors())
 
     cdef int _parse_connect_string(self, str connect_string) except -1:
         """
@@ -458,11 +458,11 @@ cdef class ConnectParamsImpl:
         except Exception as e:
             errors._raise_err(error_num, cause=e)
         self._token_obfuscator = self._get_obfuscator(token)
-        self._token = self._xor_bytes(bytearray(token.encode()),
+        self._token = self._xor_bytes(bytearray(token.encode(get_encoding(), get_encoding_errors())),
                                                 self._token_obfuscator)
         if private_key is not None:
             self._private_key_obfuscator = self._get_obfuscator(private_key)
-            self._private_key = self._xor_bytes(bytearray(private_key.encode()),
+            self._private_key = self._xor_bytes(bytearray(private_key.encode(get_encoding(), get_encoding_errors())),
                                                 self._private_key_obfuscator)
         self.access_token_expires = token_expires
 
@@ -483,7 +483,7 @@ cdef class ConnectParamsImpl:
         """
         if password is not None:
             self._new_password_obfuscator = self._get_obfuscator(password)
-            self._new_password = self._xor_bytes(bytearray(password.encode()),
+            self._new_password = self._xor_bytes(bytearray(password.encode(get_encoding(), get_encoding_errors())),
                                                  self._new_password_obfuscator)
 
     cdef int _set_password(self, str password) except -1:
@@ -492,7 +492,7 @@ cdef class ConnectParamsImpl:
         """
         if password is not None:
             self._password_obfuscator = self._get_obfuscator(password)
-            self._password = self._xor_bytes(bytearray(password.encode()),
+            self._password = self._xor_bytes(bytearray(password.encode(get_encoding(), get_encoding_errors())),
                                              self._password_obfuscator)
 
     cdef int _set_wallet_password(self, str password) except -1:
@@ -502,7 +502,7 @@ cdef class ConnectParamsImpl:
         if password is not None:
             self._wallet_password_obfuscator = self._get_obfuscator(password)
             self._wallet_password = \
-                    self._xor_bytes(bytearray(password.encode()),
+                    self._xor_bytes(bytearray(password.encode(get_encoding(), get_encoding_errors())),
                                     self._wallet_password_obfuscator)
 
     cdef bytearray _xor_bytes(self, bytearray a, bytearray b):

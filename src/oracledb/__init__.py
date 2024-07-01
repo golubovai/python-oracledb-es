@@ -81,6 +81,7 @@ from .base_impl import (
     NUMBER as NUMBER,
     ROWID as ROWID,
     STRING as STRING,
+    set_encoding,
 )
 
 from .enums import (

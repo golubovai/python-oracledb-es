@@ -136,6 +136,8 @@ from .base_impl cimport (
     VectorDecoder,
     VectorEncoder,
     pack_uint16,
+    get_encoding,
+    get_encoding_errors,
 )
 
 from .base_impl import (

@@ -500,8 +500,7 @@ cdef class MessageWithData(Message):
                                      ThinVarImpl var_impl, uint32_t pos):
         cdef:
             uint8_t num_bytes, ora_type_num, csfrm
-            const char* encoding_errors = NULL
-            bytes encoding_errors_bytes
+            str encoding_errors = None
             ThinDbObjectTypeImpl typ_impl
             BaseThinCursorImpl cursor_impl
             object column_value = None
@@ -532,8 +531,9 @@ cdef class MessageWithData(Message):
             if csfrm == CS_FORM_NCHAR:
                 buf._caps._check_ncharset_id()
             if var_impl.encoding_errors is not None:
-                encoding_errors_bytes = var_impl.encoding_errors.encode()
-                encoding_errors = encoding_errors_bytes
+                encoding_errors = var_impl.encoding_errors
+            else:
+                encoding_errors = get_encoding_errors()
             column_value = buf.read_str(csfrm, encoding_errors)
         elif ora_type_num == TNS_DATA_TYPE_RAW \
                 or ora_type_num == TNS_DATA_TYPE_LONG_RAW:
@@ -892,9 +892,9 @@ cdef class MessageWithData(Message):
                 buf.skip_raw_bytes_chunked()
             buf.read_ub2(&keyword_num)      # keyword num
             if keyword_num == TNS_KEYWORD_NUM_CURRENT_SCHEMA:
-                self.conn_impl._current_schema = key_value.decode()
+                self.conn_impl._current_schema = key_value.decode(get_encoding(), get_encoding_errors())
             elif keyword_num == TNS_KEYWORD_NUM_EDITION:
-                self.conn_impl._edition = key_value.decode()
+                self.conn_impl._edition = key_value.decode(get_encoding(), get_encoding_errors())
         buf.read_ub2(&num_bytes)            # registration
         if num_bytes > 0:
             buf.skip_raw_bytes(num_bytes)
@@ -1845,7 +1845,7 @@ cdef class ConnectMessage(Message):
             redirect_data = buf.read_raw_bytes(self.redirect_data_len)
             if self.redirect_data_len > 0:
                 self.redirect_data = \
-                        redirect_data[:self.redirect_data_len].decode()
+                        redirect_data[:self.redirect_data_len].decode(get_encoding(), get_encoding_errors())
             self.read_redirect_data_len = False
         elif buf._current_packet.packet_type == TNS_PACKET_TYPE_ACCEPT:
             buf.read_uint16(&protocol_version)
@@ -2530,10 +2530,10 @@ cdef class TransactionChangeStateMessage(Message):
             format_id = self.xid[0]
             global_transaction_id = self.xid[1] \
                     if isinstance(self.xid[1], bytes) \
-                    else self.xid[1].encode()
+                    else self.xid[1].encode(get_encoding(), get_encoding_errors())
             branch_qualifier = self.xid[2] \
                     if isinstance(self.xid[2], bytes) \
-                    else self.xid[2].encode()
+                    else self.xid[2].encode(get_encoding(), get_encoding_errors())
             xid_bytes = global_transaction_id + branch_qualifier
             xid_bytes += bytes(128 - len(xid_bytes))
 
@@ -2609,16 +2609,16 @@ cdef class TransactionSwitchMessage(Message):
             format_id = self.xid[0]
             global_transaction_id = self.xid[1] \
                     if isinstance(self.xid[1], bytes) \
-                    else self.xid[1].encode()
+                    else self.xid[1].encode(get_encoding(), get_encoding_errors())
             branch_qualifier = self.xid[2] \
                     if isinstance(self.xid[2], bytes) \
-                    else self.xid[2].encode()
+                    else self.xid[2].encode(get_encoding(), get_encoding_errors())
             xid_bytes = global_transaction_id + branch_qualifier
             xid_bytes += bytes(128 - len(xid_bytes))
         if self.conn_impl._internal_name is not None:
-            internal_name = self.conn_impl._internal_name.encode()
+            internal_name = self.conn_impl._internal_name.encode(get_encoding(), get_encoding_errors())
         if self.conn_impl._external_name is not None:
-            external_name = self.conn_impl._external_name.encode()
+            external_name = self.conn_impl._external_name.encode(get_encoding(), get_encoding_errors())
 
         # write message
         self._write_function_code(buf)
@@ -2653,7 +2653,7 @@ cdef class TransactionSwitchMessage(Message):
             buf.write_uint8(0)              # pointer (internal name)
             buf.write_ub4(0)                # length of internal name
         if external_name is not None:
-            external_name = self.conn_impl._external_name.encode()
+            external_name = self.conn_impl._external_name.encode(get_encoding(), get_encoding_errors())
             buf.write_uint8(1)              # pointer (external name)
             buf.write_ub4(len(external_name))
         else:

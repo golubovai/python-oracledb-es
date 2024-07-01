@@ -99,7 +99,7 @@ def get_signature(private_key_str, text):
     Returns a signed version of the given text (used for IAM token
     authentication) in base64 encoding.
     """
-    private_key = serialization.load_pem_private_key(private_key_str.encode(),
+    private_key = serialization.load_pem_private_key(private_key_str.encode(get_encoding(), get_encoding_errors()),
                                                      password=None)
-    sig = private_key.sign(text.encode(), padding.PKCS1v15(), hashes.SHA256())
-    return base64.b64encode(sig).decode()
+    sig = private_key.sign(text.encode(get_encoding(), get_encoding_errors()), padding.PKCS1v15(), hashes.SHA256())
+    return base64.b64encode(sig).decode(get_encoding(), get_encoding_errors())

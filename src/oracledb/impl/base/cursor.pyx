@@ -135,7 +135,7 @@ cdef class BaseCursorImpl:
             if isinstance(value, PY_TYPE_LOB):
                 value = value.read()
             if isinstance(value, bytes):
-                value = value.decode()
+                value = value.decode(get_encoding(), get_encoding_errors())
             return json.loads(value)
         return converter
 

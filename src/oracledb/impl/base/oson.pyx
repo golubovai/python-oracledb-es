@@ -149,15 +149,15 @@ cdef class OsonDecoder(Buffer):
         elif node_type == TNS_JSON_TYPE_STRING_LENGTH_UINT8:
             self.read_ub1(&temp8)
             ptr = self._get_raw(temp8)
-            return ptr[:temp8].decode()
+            return ptr[:temp8].decode(get_encoding(), get_encoding_errors())
         elif node_type == TNS_JSON_TYPE_STRING_LENGTH_UINT16:
             self.read_uint16(&temp16)
             ptr = self._get_raw(temp16)
-            return ptr[:temp16].decode()
+            return ptr[:temp16].decode(get_encoding(), get_encoding_errors())
         elif node_type == TNS_JSON_TYPE_STRING_LENGTH_UINT32:
             self.read_uint32(&temp32)
             ptr = self._get_raw(temp32)
-            return ptr[:temp32].decode()
+            return ptr[:temp32].decode(get_encoding(), get_encoding_errors())
         elif node_type == TNS_JSON_TYPE_NUMBER_LENGTH_UINT8:
             return self.read_oracle_number(NUM_TYPE_DECIMAL)
         elif node_type == TNS_JSON_TYPE_ID:
@@ -199,7 +199,7 @@ cdef class OsonDecoder(Buffer):
             if node_type == 0:
                 return ''
             ptr = self._get_raw(node_type)
-            return ptr[:node_type].decode()
+            return ptr[:node_type].decode(get_encoding(), get_encoding_errors())
 
         errors._raise_err(errors.ERR_OSON_NODE_TYPE_NOT_SUPPORTED,
                           node_type=node_type)
@@ -237,7 +237,7 @@ cdef class OsonDecoder(Buffer):
             else:
                 self.read_uint32(&offset)
             temp16 = unpack_uint16(&ptr[offset], BYTE_ORDER_MSB)
-            field_names[i] = ptr[offset + 2:offset + temp16 + 2].decode()
+            field_names[i] = ptr[offset + 2:offset + temp16 + 2].decode(get_encoding(), get_encoding_errors())
         self.skip_to(final_pos)
         return field_names
 
@@ -314,7 +314,7 @@ cdef class OsonDecoder(Buffer):
             else:
                 self.read_uint32(&offset)
             temp8 = ptr[offset]
-            field_names[i] = ptr[offset + 1:offset + temp8 + 1].decode()
+            field_names[i] = ptr[offset + 1:offset + temp8 + 1].decode(get_encoding(), get_encoding_errors())
         self.skip_to(final_pos)
         return field_names
 
@@ -456,7 +456,7 @@ cdef class OsonFieldName:
         cdef OsonFieldName field_name
         field_name = OsonFieldName.__new__(OsonFieldName)
         field_name.name = name
-        field_name.name_bytes = name.encode()
+        field_name.name_bytes = name.encode(get_encoding(), get_encoding_errors())
         field_name.name_bytes_len = len(field_name.name_bytes)
         if field_name.name_bytes_len > max_fname_size:
             errors._raise_err(errors.ERR_OSON_FIELD_NAME_LIMITATION,
@@ -604,7 +604,7 @@ cdef class OsonTreeSegment(GrowableBuffer):
 
         # handle numeric types
         elif isinstance(value, (int, float, PY_TYPE_DECIMAL)):
-            value_bytes = (<str> cpython.PyObject_Str(value)).encode()
+            value_bytes = (<str> cpython.PyObject_Str(value)).encode(get_encoding(), get_encoding_errors())
             self.write_uint8(TNS_JSON_TYPE_NUMBER_LENGTH_UINT8)
             self.write_oracle_number(value_bytes)
 
@@ -643,7 +643,7 @@ cdef class OsonTreeSegment(GrowableBuffer):
 
         # handle strings
         elif isinstance(value, str):
-            value_bytes = (<str> value).encode()
+            value_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
             value_len = len(value_bytes)
             if value_len < 256:
                 self.write_uint8(TNS_JSON_TYPE_STRING_LENGTH_UINT8)
