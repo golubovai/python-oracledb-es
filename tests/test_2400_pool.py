@@ -878,7 +878,7 @@ class TestCase(test_env.BaseTestCase):
     def test_2438(self):
         "2438 - ensure that timed wait times out with appropriate exception"
         pool = test_env.get_pool(
-            getmode=oracledb.POOL_GETMODE_TIMEDWAIT, min=0, wait_timeout=1
+            getmode=oracledb.POOL_GETMODE_TIMEDWAIT, min=0, max=0, wait_timeout=1
         )
         with self.assertRaisesFullCode("DPY-4005"):
             pool.acquire()

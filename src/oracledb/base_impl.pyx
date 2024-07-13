@@ -85,6 +85,9 @@ cdef const char* DRIVER_INSTALLATION_URL = \
 cdef const char* ENCODING_UTF8 = "UTF-8"
 cdef const char* ENCODING_UTF16 = "UTF-16BE"
 
+cdef str CS_ENCODING_UTF8 = "UTF-8"
+cdef str CS_ENCODING_UTF16 = "UTF-16BE"
+
 cdef int get_preferred_num_type(int16_t precision, int8_t scale):
     if scale == 0 or (scale == -127 and precision == 0):
         return NUM_TYPE_INT
@@ -93,7 +96,7 @@ cdef int get_preferred_num_type(int16_t precision, int8_t scale):
 cdef str _encoding = "UTF-8"
 cdef str _encoding_errors = "strict"
 
-def set_encoding(encoding, errors = "replace"):
+def set_encoding(encoding, errors = "strict"):
     global _encoding, _encoding_errors
     codecs.lookup(encoding)
     _encoding = encoding
@@ -104,12 +107,6 @@ cdef str get_encoding():
     return _encoding
 
 cdef str get_encoding_errors():
-    return _encoding_errors
-
-def get_encoding():
-    return _encoding
-
-def get_encoding_errors():
     return _encoding_errors
 
 include "impl/base/constants.pxi"

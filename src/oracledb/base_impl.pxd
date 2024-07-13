@@ -161,6 +161,9 @@ cdef str DRIVER_INSTALLATION_URL
 cdef const char* ENCODING_UTF8
 cdef const char* ENCODING_UTF16
 
+cdef str CS_ENCODING_UTF8
+cdef str CS_ENCODING_UTF16
+
 cdef class ApiType:
     cdef:
         readonly str name

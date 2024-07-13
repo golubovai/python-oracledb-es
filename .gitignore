@@ -7,3 +7,5 @@ dist/
 doc/build
 src/oracledb/*.c
 .ipynb_checkpoints/
+tests/.env
+.idea/*

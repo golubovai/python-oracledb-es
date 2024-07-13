@@ -104,6 +104,8 @@ from .base_impl cimport (
     DRIVER_VERSION,
     ENCODING_UTF8,
     ENCODING_UTF16,
+    CS_ENCODING_UTF8,
+    CS_ENCODING_UTF16,
     FetchInfoImpl,
     get_preferred_num_type,
     GrowableBuffer,

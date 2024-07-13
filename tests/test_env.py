@@ -68,6 +68,9 @@ import os
 import sys
 import unittest
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import oracledb
 
 # Python 3.7 doesn't have support for testing asyncio so fake it to avoid the
@@ -636,6 +639,7 @@ class BaseTestCase(unittest.TestCase):
             self.conn = get_connection()
             self.cursor = self.conn.cursor()
             self.cursor.execute("alter session set time_zone = '+00:00'")
+            self.cursor.execute("alter session set nls_numeric_characters = '.,'")
 
     def setup_parse_count_checker(self):
         if get_is_implicit_pooling():
@@ -673,6 +677,7 @@ class BaseAsyncTestCase(unittest.IsolatedAsyncioTestCase):
             self.conn = await get_connection_async()
             self.cursor = self.conn.cursor()
             await self.cursor.execute("alter session set time_zone = '+00:00'")
+            await self.cursor.execute("alter session set nls_numeric_characters = '.,'")
 
     async def asyncTearDown(self):
         if self.requires_connection:

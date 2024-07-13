@@ -251,14 +251,14 @@ class TestCase(test_env.BaseTestCase):
         self.__test_type_change(
             "cast('string_4614' as VARCHAR2(15))",
             "string_4614",
-            "to_date('04-JAN-2022')",
+            "to_date('04-JAN-2022', 'DD-MON-YYYY', 'NLS_DATE_LANGUAGE=''AMERICAN''')",
             datetime.datetime(2022, 1, 4, 0, 0),
         )
 
     def test_4615(self):
         "4615 - test data type changing from DATE to STRING"
         self.__test_type_change(
-            "to_date('04-JAN-2022')",
+            "to_date('04-JAN-2022', 'DD-MON-YYYY', 'NLS_DATE_LANGUAGE=''AMERICAN''')",
             datetime.datetime(2022, 1, 4, 0, 0),
             "cast('string_4615' as VARCHAR2(15))",
             "string_4615",
@@ -269,7 +269,7 @@ class TestCase(test_env.BaseTestCase):
         self.__test_type_change(
             "to_number('4616')",
             4616,
-            "to_date('05-JAN-2022')",
+            "to_date('05-JAN-2022', 'DD-MON-YYYY', 'NLS_DATE_LANGUAGE=''AMERICAN''')",
             datetime.datetime(2022, 1, 5, 0, 0),
         )
 

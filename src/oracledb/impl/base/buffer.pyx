@@ -744,7 +744,7 @@ cdef class Buffer:
                 encoding_errors = get_encoding_errors()
             if csfrm == CS_FORM_IMPLICIT:
                 return ptr[:num_bytes].decode(get_encoding(), encoding_errors)
-            return ptr[:num_bytes].decode(ENCODING_UTF16, encoding_errors)
+            return ptr[:num_bytes].decode(CS_ENCODING_UTF16, encoding_errors)
 
     cdef int read_ub1(self, uint8_t *value) except -1:
         """
