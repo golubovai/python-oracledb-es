@@ -102,8 +102,6 @@ from .base_impl cimport (
     DescriptionList,
     DRIVER_NAME,
     DRIVER_VERSION,
-    ENCODING_UTF8,
-    ENCODING_UTF16,
     CS_ENCODING_UTF8,
     CS_ENCODING_UTF16,
     FetchInfoImpl,
@@ -139,6 +137,7 @@ from .base_impl cimport (
     VectorEncoder,
     pack_uint16,
     get_encoding,
+    get_charset_id,
     get_encoding_errors,
 )
 

@@ -1006,7 +1006,7 @@ cdef class MessageWithData(Message):
                 buf.write_ub4(0)            # OID
                 buf.write_ub2(0)            # version
             if var_impl.dbtype._csfrm != 0:
-                buf.write_ub2(TNS_CHARSET_UTF8)
+                buf.write_ub2(get_charset_id())
             else:
                 buf.write_ub2(0)
             buf.write_uint8(var_impl.dbtype._csfrm)
@@ -1041,10 +1041,10 @@ cdef class MessageWithData(Message):
                 or ora_type_num == TNS_DATA_TYPE_CHAR \
                 or ora_type_num == TNS_DATA_TYPE_LONG:
             if var_impl.dbtype._csfrm == CS_FORM_IMPLICIT:
-                temp_bytes = (<str> value).encode()
+                temp_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
             else:
                 buf._caps._check_ncharset_id()
-                temp_bytes = (<str> value).encode(ENCODING_UTF16)
+                temp_bytes = (<str> value).encode(CS_ENCODING_UTF16)
             buf.write_bytes_with_length(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_RAW \
                 or ora_type_num == TNS_DATA_TYPE_LONG_RAW:
@@ -1668,8 +1668,8 @@ cdef class AuthMessage(Message):
     cdef int _write_key_value(self, WriteBuffer buf, str key, str value,
                               uint32_t flags=0) except -1:
         cdef:
-            bytes key_bytes = key.encode()
-            bytes value_bytes = value.encode()
+            bytes key_bytes = key.encode(get_encoding(), get_encoding_errors())
+            bytes value_bytes = value.encode(get_encoding(), get_encoding_errors())
             uint32_t key_len = <uint32_t> len(key_bytes)
             uint32_t value_len = <uint32_t> len(value_bytes)
         buf.write_ub4(key_len)
@@ -1765,7 +1765,7 @@ cdef class AuthMessage(Message):
                 self._write_key_value(buf, "AUTH_NEWPASSWORD",
                                       self.encoded_newpassword)
             if not self.change_password:
-                self._write_key_value(buf, "SESSION_CLIENT_CHARSET", "873")
+                self._write_key_value(buf, "SESSION_CLIENT_CHARSET", str(get_charset_id()))
                 driver_name = f"{DRIVER_NAME} thn : {DRIVER_VERSION}"
                 self._write_key_value(buf, "SESSION_CLIENT_DRIVER_NAME",
                                       driver_name)
@@ -2248,12 +2248,11 @@ cdef class LobOpMessage(Message):
             str encoding
         if message_type == TNS_MSG_TYPE_LOB_DATA:
             buf.read_raw_bytes_and_length(&ptr, &num_bytes)
-            if self.source_lob_impl.dbtype._ora_type_num in \
-                    (TNS_DATA_TYPE_BLOB, TNS_DATA_TYPE_BFILE):
+            if self.source_lob_impl.dbtype._ora_type_num in (TNS_DATA_TYPE_BLOB, TNS_DATA_TYPE_BFILE):
                 self.data = ptr[:num_bytes]
             else:
                 encoding = self.source_lob_impl._get_encoding()
-                self.data = ptr[:num_bytes].decode(encoding)
+                self.data = ptr[:num_bytes].decode(encoding, get_encoding_errors())
         else:
             Message._process_message(self, buf, message_type)
 
@@ -2330,7 +2329,7 @@ cdef class LobOpMessage(Message):
                 buf._caps._check_ncharset_id()
                 buf.write_ub4(TNS_CHARSET_UTF16)
             else:
-                buf.write_ub4(TNS_CHARSET_UTF8)
+                buf.write_ub4(get_charset_id())
         if self.data is not None:
             buf.write_uint8(TNS_MSG_TYPE_LOB_DATA)
             buf.write_bytes_with_length(self.data)

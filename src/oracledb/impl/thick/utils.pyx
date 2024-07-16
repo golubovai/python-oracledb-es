@@ -483,7 +483,7 @@ def init_oracle_client(lib_dir=None, config_dir=None, error_url=None,
     Oracle Client library will cause this method to be called internally.
     """
     cdef:
-        bytes lib_dir_bytes, config_dir_bytes, driver_name_bytes
+        bytes default_encoding_bytes, lib_dir_bytes, config_dir_bytes, driver_name_bytes
         dpiContextCreateParams params
         dpiErrorInfo error_info
     global driver_context_params
@@ -494,7 +494,8 @@ def init_oracle_client(lib_dir=None, config_dir=None, error_url=None,
         return
     with driver_mode.get_manager(requested_thin_mode=False) as mode_mgr:
         memset(&params, 0, sizeof(dpiContextCreateParams))
-        params.defaultEncoding = ENCODING_UTF8
+        default_encoding_bytes = CS_ENCODING_UTF8.encode()
+        params.defaultEncoding = default_encoding_bytes
         params.sodaUseJsonDesc = driver_info.soda_use_json_desc
         params.useJsonId = True
         if config_dir is None:

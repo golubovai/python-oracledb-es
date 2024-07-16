@@ -82,8 +82,6 @@ cdef const char* DRIVER_VERSION
 cdef const char* DRIVER_INSTALLATION_URL = \
         "https://python-oracledb.readthedocs.io/en/" \
         "latest/user_guide/initialization.html"
-cdef const char* ENCODING_UTF8 = "UTF-8"
-cdef const char* ENCODING_UTF16 = "UTF-16BE"
 
 cdef str CS_ENCODING_UTF8 = "UTF-8"
 cdef str CS_ENCODING_UTF16 = "UTF-16BE"
@@ -94,17 +92,79 @@ cdef int get_preferred_num_type(int16_t precision, int8_t scale):
     return NUM_TYPE_FLOAT
 
 cdef str _encoding = "UTF-8"
+cdef int _charset_id = 873
 cdef str _encoding_errors = "strict"
+
+charset_map = {'ascii': 1,
+               'cp437': 4,
+               'cp037': 5,
+               'cp500': 6,
+               'cp1140': 7,
+               'cp850': 10,
+               'latin_1': 31,
+               'iso8859_2': 32,
+               'iso8859_3': 33,
+               'iso8859_4': 34,
+               'iso8859_5': 35,
+               'iso8859_6': 36,
+               'iso8859_7': 37,
+               'iso8859_8': 38,
+               'iso8859_9': 39,
+               'iso8859_10': 40,
+               'tis-620': 41,
+               'cp1258': 45,
+               'iso8859_15': 46,
+               'iso8859_13': 47,
+               'iso8859_14': 48,
+               'koi8_u': 51,
+               'cp424': 92,
+               'cp1026': 93,
+               'cp852': 150,
+               'cp866': 152,
+               'cp862': 154,
+               'cp855': 155,
+               'cp857': 156,
+               'cp860': 160,
+               'cp861': 161,
+               'cp1250': 170,
+               'cp1251': 171,
+               'cp1253': 174,
+               'cp1255': 175,
+               'cp1254': 177,
+               'cp1252': 178,
+               'cp1257': 179,
+               'cp273': 180,
+               'cp865': 190,
+               'koi8_r': 196,
+               'cp775': 197,
+               'hp-roman8': 261,
+               'mac-roman': 351,
+               'cp869': 385,
+               'cp863': 390,
+               'cp1256': 560,
+               'euc_jp': 830,
+               'shift_jis': 832,
+               'euc_kr': 846,
+               'gbk': 852,
+               'gb18030': 854,
+               'big5': 867,
+               'big5hkscs': 868,
+               'utf-8': 873,
+               'utf-16be': 2000,}
 
 def set_encoding(encoding, errors = "strict"):
     global _encoding, _encoding_errors
-    codecs.lookup(encoding)
+    info = codecs.lookup(encoding)
     _encoding = encoding
+    _charset_id = charset_map[info.name]
     if errors in ("strict", "ignore", "replace"):
         _encoding_errors = errors
 
 cdef str get_encoding():
     return _encoding
+
+cdef int get_charset_id():
+    return _charset_id
 
 cdef str get_encoding_errors():
     return _encoding_errors

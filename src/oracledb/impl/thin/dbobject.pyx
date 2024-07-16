@@ -262,7 +262,7 @@ cdef class ThinDbObjectImpl(BaseDbObjectImpl):
             if dbtype._csfrm == CS_FORM_IMPLICIT:
                 temp_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
             else:
-                temp_bytes = (<str> value).encode(ENCODING_UTF16)
+                temp_bytes = (<str> value).encode(CS_ENCODING_UTF16)
             buf.write_bytes_with_length(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_NUMBER:
             temp_bytes = (<str> cpython.PyObject_Str(value)).encode(get_encoding(), get_encoding_errors())
