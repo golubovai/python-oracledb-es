@@ -152,7 +152,7 @@ cdef class BaseThinLobImpl(BaseLobImpl):
                 raise TypeError(
                     "only strings can be written to CLOBs and NCLOBS"
                 )
-            message.data = value.encode(self._get_encoding())
+            message.data = value.encode(self._get_encoding(), get_encoding_errors())
         return message
 
     cdef LobOpMessage _create_file_exists_message(self):
@@ -205,7 +205,7 @@ cdef class BaseThinLobImpl(BaseLobImpl):
                 or self._locator[TNS_LOB_LOC_OFFSET_FLAG_3] & \
                 TNS_LOB_LOC_FLAGS_VAR_LENGTH_CHARSET:
             return CS_ENCODING_UTF16
-        return CS_ENCODING_UTF8
+        return get_encoding()
 
     def free_lob(self):
         """

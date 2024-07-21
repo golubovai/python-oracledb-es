@@ -1054,7 +1054,7 @@ cdef class MessageWithData(Message):
             if isinstance(value, bool):
                 temp_bytes = b'1' if value is True else b'0'
             else:
-                temp_bytes = (<str> cpython.PyObject_Str(value)).encode()
+                temp_bytes = (<str> cpython.PyObject_Str(value)).encode(get_encoding(), get_encoding_errors())
             buf.write_oracle_number(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_DATE \
                 or ora_type_num == TNS_DATA_TYPE_TIMESTAMP \
@@ -1089,7 +1089,7 @@ cdef class MessageWithData(Message):
             ):
             buf.write_lob_with_length(value._impl)
         elif ora_type_num in (TNS_DATA_TYPE_ROWID, TNS_DATA_TYPE_UROWID):
-            temp_bytes = (<str> value).encode()
+            temp_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
             buf.write_bytes_with_length(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_INT_NAMED:
             buf.write_dbobject(value._impl)
@@ -1147,7 +1147,7 @@ cdef class MessageWithData(Message):
         cdef bytes schema_bytes
         self._write_piggyback_code(buf, TNS_FUNC_SET_SCHEMA)
         buf.write_uint8(1)                  # pointer
-        schema_bytes = self.conn_impl._current_schema.encode()
+        schema_bytes = self.conn_impl._current_schema.encode(get_encoding(), get_encoding_errors())
         buf.write_ub4(len(schema_bytes))
         buf.write_bytes_with_length(schema_bytes)
 
@@ -1221,7 +1221,7 @@ cdef class MessageWithData(Message):
             if conn_impl._client_identifier is None:
                 buf.write_ub4(0)
             else:
-                client_identifier_bytes = conn_impl._client_identifier.encode()
+                client_identifier_bytes = conn_impl._client_identifier.encode(get_encoding(), get_encoding_errors())
                 buf.write_ub4(len(client_identifier_bytes))
         else:
             buf.write_uint8(0)              # pointer (client identifier)
@@ -1233,7 +1233,7 @@ cdef class MessageWithData(Message):
             if conn_impl._module is None:
                 buf.write_ub4(0)
             else:
-                module_bytes = conn_impl._module.encode()
+                module_bytes = conn_impl._module.encode(get_encoding(), get_encoding_errors())
                 buf.write_ub4(len(module_bytes))
         else:
             buf.write_uint8(0)              # pointer (module)
@@ -1245,7 +1245,7 @@ cdef class MessageWithData(Message):
             if conn_impl._action is None:
                 buf.write_ub4(0)
             else:
-                action_bytes = conn_impl._action.encode()
+                action_bytes = conn_impl._action.encode(get_encoding(), get_encoding_errors())
                 buf.write_ub4(len(action_bytes))
         else:
             buf.write_uint8(0)              # pointer (action)
@@ -1263,7 +1263,7 @@ cdef class MessageWithData(Message):
             if conn_impl._client_info is None:
                 buf.write_ub4(0)
             else:
-                client_info_bytes = conn_impl._client_info.encode()
+                client_info_bytes = conn_impl._client_info.encode(get_encoding(), get_encoding_errors())
                 buf.write_ub4(len(client_info_bytes))
         else:
             buf.write_uint8(0)              # pointer (client info)
@@ -1281,7 +1281,7 @@ cdef class MessageWithData(Message):
             if conn_impl._dbop is None:
                 buf.write_ub4(0)
             else:
-                dbop_bytes = conn_impl._dbop.encode()
+                dbop_bytes = conn_impl._dbop.encode(get_encoding(), get_encoding_errors())
                 buf.write_ub4(len(dbop_bytes))
         else:
             buf.write_uint8(0)              # pointer (dbop)
@@ -1494,7 +1494,7 @@ cdef class AuthMessage(Message):
             salt = bytes.fromhex(self.session_data['AUTH_PBKDF2_CSK_SALT'])
             iterations = int(self.session_data['AUTH_PBKDF2_SDER_COUNT'])
             temp_key = session_key_part_b[:keylen] + session_key_part_a[:keylen]
-            combo_key = get_derived_key(temp_key.hex().upper().encode(), salt,
+            combo_key = get_derived_key(temp_key.hex().upper().encode(get_encoding(), get_encoding_errors()), salt,
                                         keylen, iterations)
 
         # retain session key for use by the change password API
@@ -1512,7 +1512,7 @@ cdef class AuthMessage(Message):
         # check if debug_jdwp is set. if set, encode the data using the
         # combo session key with zeros padding
         if self.debug_jdwp is not None:
-            jdwp_data = self.debug_jdwp.encode()
+            jdwp_data = self.debug_jdwp.encode(get_encoding(), get_encoding_errors())
             encrypted_jdwp_data = encrypt_cbc(combo_key, jdwp_data, zeros=True)
             # Add a "01" at the end of the hex encrypted data to indicate the
             # use of AES encryption
@@ -1566,7 +1566,7 @@ cdef class AuthMessage(Message):
         self.function_code = TNS_FUNC_AUTH_PHASE_ONE
         self.session_data = {}
         if self.conn_impl.username is not None:
-            self.user_bytes = self.conn_impl.username.encode()
+            self.user_bytes = self.conn_impl.username.encode(get_encoding(), get_encoding_errors())
             self.user_bytes_len = len(self.user_bytes)
         self.resend = True
 
@@ -1766,7 +1766,7 @@ cdef class AuthMessage(Message):
                                       self.encoded_newpassword)
             if not self.change_password:
                 self._write_key_value(buf, "SESSION_CLIENT_CHARSET", str(get_charset_id()))
-                driver_name = f"{DRIVER_NAME} thn : {DRIVER_VERSION}"
+                driver_name = f"{DRIVER_NAME} thin : {DRIVER_VERSION}"
                 self._write_key_value(buf, "SESSION_CLIENT_DRIVER_NAME",
                                       driver_name)
                 self._write_key_value(buf, "SESSION_CLIENT_VERSION",
@@ -1803,7 +1803,7 @@ cdef class ChangePasswordMessage(AuthMessage):
         """
         self.change_password = True
         self.function_code = TNS_FUNC_AUTH_PHASE_TWO
-        self.user_bytes = self.conn_impl.username.encode()
+        self.user_bytes = self.conn_impl.username.encode(get_encoding(), get_encoding_errors())
         self.user_bytes_len = len(self.user_bytes)
         self.auth_mode = TNS_AUTH_MODE_WITH_PASSWORD | \
                 TNS_AUTH_MODE_CHANGE_PASSWORD
@@ -1946,8 +1946,8 @@ cdef class DataTypesMessage(Message):
 
         # write character set and capabilities
         buf.write_uint8(TNS_MSG_TYPE_DATA_TYPES)
-        buf.write_uint16(TNS_CHARSET_UTF8, BYTE_ORDER_LSB)
-        buf.write_uint16(TNS_CHARSET_UTF8, BYTE_ORDER_LSB)
+        buf.write_uint16(get_charset_id(), BYTE_ORDER_LSB)
+        buf.write_uint16(get_charset_id(), BYTE_ORDER_LSB)
         buf.write_uint8(TNS_ENCODING_MULTI_BYTE | TNS_ENCODING_CONV_LENGTH)
         buf.write_bytes_with_length(bytes(buf._caps.compile_caps))
         buf.write_bytes_with_length(bytes(buf._caps.runtime_caps))

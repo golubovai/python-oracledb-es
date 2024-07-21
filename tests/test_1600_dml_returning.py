@@ -303,7 +303,7 @@ class TestCase(test_env.BaseTestCase):
             [rowid],
         )
         self.assertEqual(
-            self.cursor.fetchall(), [(187, "String 7 (Modified)")]
+            self.cursor.fetchall(), [(187, "String (кириллица) 7 (Modified)")]
         )
 
     def test_1610(self):

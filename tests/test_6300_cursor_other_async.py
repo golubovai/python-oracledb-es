@@ -414,7 +414,7 @@ class TestCase(test_env.BaseAsyncTestCase):
         "6324 - test executing SQL with non-ASCII characters"
         await self.cursor.execute("select 'FÖÖ' from dual")
         (result,) = await self.cursor.fetchone()
-        self.assertIn(result, ("FÖÖ", "F¿¿"))
+        self.assertIn(result, ("FÖÖ", "F¿¿", "F??"))
 
     async def test_6325(self):
         "6325 - test case sensitivity of unquoted bind names"

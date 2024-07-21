@@ -80,7 +80,7 @@ end;
 -- create types
 create type &main_user..udt_SubObject as object (
     SubNumberValue                      number,
-    SubStringValue                      varchar2(60)
+    SubStringValue                      varchar2(80)
 );
 /
 
@@ -90,11 +90,11 @@ varray(10) of &main_user..udt_SubObject;
 
 create type &main_user..udt_Object as object (
     NumberValue                         number,
-    StringValue                         varchar2(60),
-    FixedCharValue                      char(10),
-    NStringValue                        nvarchar2(60),
-    NFixedCharValue                     nchar(10),
-    RawValue                            raw(16),
+    StringValue                         varchar2(80),
+    FixedCharValue                      char(30),
+    NStringValue                        nvarchar2(80),
+    NFixedCharValue                     nchar(30),
+    RawValue                            raw(32),
     IntValue                            integer,
     SmallIntValue                       smallint,
     RealValue                           real,
@@ -159,7 +159,7 @@ create table &main_user..TestNumbers (
 
 create table &main_user..TestStrings (
     IntCol                              number(9) not null,
-    StringCol                           varchar2(20) not null,
+    StringCol                           varchar2(50) not null,
     RawCol                              raw(30) not null,
     FixedCharCol                        char(40) not null,
     NullableCol                         varchar2(50)
@@ -168,7 +168,7 @@ create table &main_user..TestStrings (
 
 create table &main_user..TestUnicodes (
     IntCol                              number(9) not null,
-    UnicodeCol                          nvarchar2(20) not null,
+    UnicodeCol                          nvarchar2(50) not null,
     FixedUnicodeCol                     nchar(40) not null,
     NullableCol                         nvarchar2(50)
 )
@@ -441,11 +441,11 @@ declare
 
 begin
     for i in 1..10 loop
-        t_RawValue := hextoraw(ConvertToHex('Raw ' || to_char(i)));
+        t_RawValue := hextoraw(ConvertToHex('Raw (кириллица) ' || to_char(i)));
         insert into &main_user..TestStrings
-        values (i, 'String ' || to_char(i), t_RawValue,
-                'Fixed Char ' || to_char(i),
-                decode(mod(i, 2), 0, null, 'Nullable ' || to_char(i)));
+        values (i, 'String (кириллица) ' || to_char(i), t_RawValue,
+                'Fixed Char (кириллица) ' || to_char(i),
+                decode(mod(i, 2), 0, null, 'Nullable (кириллица) ' || to_char(i)));
     end loop;
 end;
 /
@@ -453,9 +453,9 @@ end;
 begin
     for i in 1..10 loop
         insert into &main_user..TestUnicodes
-        values (i, 'Unicode ' || unistr('\3042') || ' ' || to_char(i),
-                'Fixed Unicode ' || to_char(i),
-                decode(mod(i, 2), 0, null, unistr('Nullable ') || to_char(i)));
+        values (i, 'Unicode (кириллица) ' || unistr('\3042') || ' ' || to_char(i),
+                'Fixed Unicode (кириллица) ' || to_char(i),
+                decode(mod(i, 2), 0, null, unistr('Nullable (кириллица) ') || to_char(i)));
     end loop;
 end;
 /
@@ -474,7 +474,7 @@ begin
     for i in 1..100 loop
         insert into &main_user..TestXML
         values (i, '<?xml version="1.0"?><records>' ||
-                dbms_random.string('x', 1024) || '</records>');
+                dbms_random.string('x', 1024) || ' (кириллица)</records>');
     end loop;
 end;
 /
@@ -558,12 +558,12 @@ insert into &main_user..TestObjects values (1,
                 'YYYYMMDD HH24:MI:SS TZH:TZM'),
         to_timestamp_tz('20101114 18:55:00 00:00',
                 'YYYYMMDD HH24:MI:SS TZH:TZM'),
-        'Short CLOB value', 'Short NCLOB Value',
-        utl_raw.cast_to_raw('Short BLOB value'),
-        &main_user..udt_SubObject(11, 'Sub object 1'),
+        'Short CLOB value (кириллица)', 'Short NCLOB Value (кириллица)',
+        utl_raw.cast_to_raw('Short BLOB value (кириллица)'),
+        &main_user..udt_SubObject(11, 'Sub object 1 (кириллица)'),
         &main_user..udt_ObjectArray(
-                &main_user..udt_SubObject(5, 'first element'),
-                &main_user..udt_SubObject(6, 'second element'))),
+                &main_user..udt_SubObject(5, 'first element (кириллица)'),
+                &main_user..udt_SubObject(6, 'second element (кириллица)'))),
     &main_user..udt_Array(5, 10, null, 20))
 /
 
@@ -572,7 +572,7 @@ insert into &main_user..TestObjects values (2, null,
 /
 
 insert into &main_user..TestObjects values (3,
-    &main_user..udt_Object(3, 'Third row', 'Third', 'N Third Row', 'N Third',
+    &main_user..udt_Object(3, 'Third row (кириллица)', 'Third (кириллица)', 'N Third Row (кириллица)', 'N Third (кириллица)',
         '52617720446174612033', 4, 10, 6.5, 0.75, 43.25, 86.5, 192.125,
         to_date(20070621, 'YYYYMMDD'),
         to_timestamp('20071213 07:30:45', 'YYYYMMDD HH24:MI:SS'),
@@ -580,14 +580,14 @@ insert into &main_user..TestObjects values (3,
                 'YYYYMMDD HH24:MI:SS TZH:TZM'),
         to_timestamp_tz('20170721 08:27:13 00:00',
                 'YYYYMMDD HH24:MI:SS TZH:TZM'),
-        'Another short CLOB value', 'Another short NCLOB Value',
-        utl_raw.cast_to_raw('Yet another short BLOB value'),
-        &main_user..udt_SubObject(13, 'Sub object 3'),
+        'Another short CLOB value (кириллица)', 'Another short NCLOB Value (кириллица)',
+        utl_raw.cast_to_raw('Yet another short BLOB value (кириллица)'),
+        &main_user..udt_SubObject(13, 'Sub object 3 (кириллица)'),
         &main_user..udt_ObjectArray(
-                &main_user..udt_SubObject(10, 'element #1'),
-                &main_user..udt_SubObject(20, 'element #2'),
-                &main_user..udt_SubObject(30, 'element #3'),
-                &main_user..udt_SubObject(40, 'element #4'))), null)
+                &main_user..udt_SubObject(10, 'element #1 (кириллица)'),
+                &main_user..udt_SubObject(20, 'element #2 (кириллица)'),
+                &main_user..udt_SubObject(30, 'element #3 (кириллица)'),
+                &main_user..udt_SubObject(40, 'element #4 (кириллица)'))), null)
 /
 
 insert into &main_user..TestJsonCols values (1,
@@ -691,7 +691,7 @@ create or replace package body &main_user..pkg_TestStringArrays as
     ) is
     begin
         for i in 1..a_NumElems loop
-            a_Array(i) := 'Converted element # ' ||
+            a_Array(i) := 'Converted element (кириллица) # ' ||
                     to_char(i) || ' originally had length ' ||
                     to_char(length(a_Array(i)));
         end loop;
@@ -703,7 +703,7 @@ create or replace package body &main_user..pkg_TestStringArrays as
     ) is
     begin
         for i in 1..a_NumElems loop
-            a_Array(i) := 'Test out element # ' || to_char(i);
+            a_Array(i) := 'Test out element (кириллица) # ' || to_char(i);
         end loop;
     end;
 
@@ -711,10 +711,10 @@ create or replace package body &main_user..pkg_TestStringArrays as
         a_Array             out nocopy udt_StringList
     ) is
     begin
-        a_Array(-1048576) := 'First element';
-        a_Array(-576) := 'Second element';
-        a_Array(284) := 'Third element';
-        a_Array(8388608) := 'Fourth element';
+        a_Array(-1048576) := 'First element (кириллица)';
+        a_Array(-576) := 'Second element (кириллица)';
+        a_Array(284) := 'Third element (кириллица)';
+        a_Array(8388608) := 'Fourth element (кириллица)';
     end;
 
 end;
@@ -763,7 +763,7 @@ create or replace package body &main_user..pkg_TestUnicodeArrays as
     ) is
     begin
         for i in 1..a_NumElems loop
-            a_Array(i) := unistr('Converted element ' || unistr('\3042') ||
+            a_Array(i) := unistr('Converted element (кириллица) ' || unistr('\3042') ||
                     ' # ') || to_char(i) || ' originally had length ' ||
                     to_char(length(a_Array(i)));
         end loop;
@@ -775,7 +775,7 @@ create or replace package body &main_user..pkg_TestUnicodeArrays as
     ) is
     begin
         for i in 1..a_NumElems loop
-            a_Array(i) := unistr('Test out element ') || unistr('\3042') ||
+            a_Array(i) := unistr('Test out element (кириллица) ') || unistr('\3042') ||
                     ' # ' || to_char(i);
         end loop;
     end;
@@ -1232,7 +1232,7 @@ create or replace package body &main_user..pkg_TestRecords as
     ) is
     begin
         a_Value.NumberValue := 25;
-        a_Value.StringValue := 'String in record';
+        a_Value.StringValue := 'String in record (кириллица)';
         a_Value.DateValue := to_date(20160216, 'YYYYMMDD');
         a_Value.TimestampValue := to_timestamp('20160216 18:23:55',
                 'YYYYMMDD HH24:MI:SS');
@@ -1292,7 +1292,7 @@ create or replace package body &main_user..pkg_SessionCallback as
     begin
         t_Pos := instr(a_Property, '=');
         if t_Pos = 0 then
-            raise_application_error(-20000, 'Tag must contain key=value pairs');
+            raise_application_error(-20000, 'Tag must contain key=value pairs (кириллица)');
         end if;
         a_Name := substr(a_Property, 1, t_Pos - 1);
         a_Value := substr(a_Property, t_Pos + 1);
@@ -1311,10 +1311,10 @@ create or replace package body &main_user..pkg_SessionCallback as
             t_ValidValues('SIMPLE') := 'YYYY-MM-DD HH24:MI';
             t_ValidValues('FULL') := 'YYYY-MM-DD HH24:MI:SS';
         else
-            raise_application_error(-20000, 'Unsupported session setting');
+            raise_application_error(-20000, 'Unsupported session setting (кириллица)');
         end if;
         if not t_ValidValues.exists(a_Value) then
-            raise_application_error(-20000, 'Unsupported session setting');
+            raise_application_error(-20000, 'Unsupported session setting (кириллица)');
         end if;
         execute immediate
                 'ALTER SESSION SET ' || a_Name || '=''' ||

@@ -69,15 +69,15 @@ class TestCase(test_env.BaseTestCase):
             (
                 "STRINGCOL",
                 oracledb.DB_TYPE_VARCHAR,
-                20,
-                20 * varchar_ratio,
+                50,
+                50 * varchar_ratio,
                 None,
                 None,
                 False,
             ),
         ]
         self.assertEqual(cursor.description, expected_value)
-        self.assertEqual(cursor.fetchall(), [(1, "String 1"), (2, "String 2")])
+        self.assertEqual(cursor.fetchall(), [(1, "String (кириллица) 1"), (2, "String (кириллица) 2")])
 
     def test_1302(self):
         "1302 - test that binding the cursor itself is not supported"
@@ -145,14 +145,14 @@ class TestCase(test_env.BaseTestCase):
                         from TestStrings where IntCol
                         between :start_value and :end_value;
                 end;"""
-        expected_value = [(2, "String 2"), (3, "String 3"), (4, "String 4")]
+        expected_value = [(2, "String (кириллица) 2"), (3, "String (кириллица) 3"), (4, "String (кириллица) 4")]
         self.cursor.execute(
             sql, rcursor=ref_cursor, start_value=2, end_value=4
         )
         self.assertEqual(ref_cursor.fetchall(), expected_value)
         ref_cursor.close()
 
-        expected_value = [(5, "String 5"), (6, "String 6")]
+        expected_value = [(5, "String (кириллица) 5"), (6, "String (кириллица) 6")]
         ref_cursor = self.conn.cursor()
         self.cursor.execute(
             sql, rcursor=ref_cursor, start_value=5, end_value=6
@@ -212,7 +212,7 @@ class TestCase(test_env.BaseTestCase):
                 [2],
             )
             self.assertEqual(
-                ref_cursor.fetchall(), [(1, "String 1"), (2, "String 2")]
+                ref_cursor.fetchall(), [(1, "String (кириллица) 1"), (2, "String (кириллица) 2")]
             )
 
     def test_1309(self):

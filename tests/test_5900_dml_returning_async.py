@@ -304,7 +304,7 @@ class TestCase(test_env.BaseAsyncTestCase):
             [rowid],
         )
         self.assertEqual(
-            await self.cursor.fetchall(), [(187, "String 7 (Modified)")]
+            await self.cursor.fetchall(), [(187, "String (кириллица) 7 (Modified)")]
         )
 
     async def test_5910(self):

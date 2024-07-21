@@ -91,10 +91,6 @@ cdef int get_preferred_num_type(int16_t precision, int8_t scale):
         return NUM_TYPE_INT
     return NUM_TYPE_FLOAT
 
-cdef str _encoding = "UTF-8"
-cdef int _charset_id = 873
-cdef str _encoding_errors = "strict"
-
 charset_map = {'ascii': 1,
                'cp437': 4,
                'cp037': 5,
@@ -152,22 +148,35 @@ charset_map = {'ascii': 1,
                'utf-8': 873,
                'utf-16be': 2000,}
 
-def set_encoding(encoding, errors = "strict"):
-    global _encoding, _encoding_errors
+cdef str _encoding = "UTF-8"
+cdef int _charset_id = 873
+cdef str _encoding_errors = "strict"
+
+cdef str get_encoding():
+    return _encoding
+
+cdef str get_encoding_errors():
+    return _encoding_errors
+
+cdef int get_charset_id():
+    return _charset_id
+
+def set_encoding_(encoding, errors = "strict"):
+    global _encoding, _charset_id, _encoding_errors
     info = codecs.lookup(encoding)
     _encoding = encoding
     _charset_id = charset_map[info.name]
     if errors in ("strict", "ignore", "replace"):
         _encoding_errors = errors
 
-cdef str get_encoding():
+def get_encoding_():
     return _encoding
 
-cdef int get_charset_id():
-    return _charset_id
-
-cdef str get_encoding_errors():
+def get_encoding_errors_():
     return _encoding_errors
+
+def get_charset_id_():
+    return _charset_id
 
 include "impl/base/constants.pxi"
 include "impl/base/defaults.pyx"

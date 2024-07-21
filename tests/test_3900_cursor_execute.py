@@ -350,7 +350,7 @@ class TestCase(test_env.BaseTestCase):
             where IntCol between 1 and 3 order by IntCol
             """
         )
-        expected_data = [(1, "String 1"), (2, "String 2"), (3, "String 3")]
+        expected_data = [(1, "String (кириллица) 1"), (2, "String (кириллица) 2"), (3, "String (кириллица) 3")]
         self.assertEqual(self.cursor.fetchall(), expected_data)
 
     def test_3926(self):
@@ -363,8 +363,8 @@ class TestCase(test_env.BaseTestCase):
             column_names = [col[0] for col in ref_cursor.description]
             ref_cursor.rowfactory = lambda *row: dict(zip(column_names, row))
             expected_value = [
-                {"INTCOL": 1, "STRINGCOL": "String 1"},
-                {"INTCOL": 2, "STRINGCOL": "String 2"},
+                {"INTCOL": 1, "STRINGCOL": "String (кириллица) 1"},
+                {"INTCOL": 2, "STRINGCOL": "String (кириллица) 2"},
             ]
             self.assertEqual(ref_cursor.fetchall(), expected_value)
 

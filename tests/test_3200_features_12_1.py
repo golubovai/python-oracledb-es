@@ -234,7 +234,7 @@ class TestCase(test_env.BaseTestCase):
         obj.BINARYINTEGERVALUE = 9
         self.cursor.callproc("pkg_TestRecords.TestOut", [obj])
         self.assertEqual(obj.NUMBERVALUE, 25)
-        self.assertEqual(obj.STRINGVALUE, "String in record")
+        self.assertEqual(obj.STRINGVALUE, "String in record (кириллица)")
         self.assertEqual(obj.DATEVALUE, datetime.datetime(2016, 2, 16))
         self.assertEqual(
             obj.TIMESTAMPVALUE, datetime.datetime(2016, 2, 16, 18, 23, 55)
@@ -266,9 +266,9 @@ class TestCase(test_env.BaseTestCase):
         obj.append("The third and final element")
         self.cursor.callproc("pkg_TestStringArrays.TestInOutArrays", (3, obj))
         expected_values = [
-            "Converted element # 1 originally had length 17",
-            "Converted element # 2 originally had length 18",
-            "Converted element # 3 originally had length 27",
+            "Converted element (кириллица) # 1 originally had length 17",
+            "Converted element (кириллица) # 2 originally had length 18",
+            "Converted element (кириллица) # 3 originally had length 27",
         ]
         self.assertEqual(obj.aslist(), expected_values)
 
@@ -278,7 +278,7 @@ class TestCase(test_env.BaseTestCase):
         type_obj = self.conn.gettype(type_name)
         obj = type_obj.newobject()
         self.cursor.callproc("pkg_TestStringArrays.TestOutArrays", (4, obj))
-        expected_values = [f"Test out element # {i + 1}" for i in range(4)]
+        expected_values = [f"Test out element (кириллица) # {i + 1}" for i in range(4)]
         self.assertEqual(obj.aslist(), expected_values)
 
     def test_3216(self):
@@ -294,19 +294,19 @@ class TestCase(test_env.BaseTestCase):
         self.assertEqual(obj.size(), 4)
         self.assertTrue(obj.exists(-576))
         self.assertFalse(obj.exists(-577))
-        self.assertEqual(obj.getelement(284), "Third element")
+        self.assertEqual(obj.getelement(284), "Third element (кириллица)")
         expected_list = [
-            "First element",
-            "Second element",
-            "Third element",
-            "Fourth element",
+            "First element (кириллица)",
+            "Second element (кириллица)",
+            "Third element (кириллица)",
+            "Fourth element (кириллица)",
         ]
         self.assertEqual(obj.aslist(), expected_list)
         expected_dict = {
-            -1048576: "First element",
-            -576: "Second element",
-            284: "Third element",
-            8388608: "Fourth element",
+            -1048576: "First element (кириллица)",
+            -576: "Second element (кириллица)",
+            284: "Third element (кириллица)",
+            8388608: "Fourth element (кириллица)",
         }
         self.assertEqual(obj.asdict(), expected_dict)
         obj.delete(-576)

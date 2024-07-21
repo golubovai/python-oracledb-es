@@ -53,7 +53,7 @@ class TestCase(test_env.BaseAsyncTestCase):
             self.assertEqual(count, 10)
 
     async def __verify_fetched_data(self, connection):
-        expected_data = [f"String {i + 1}" for i in range(10)]
+        expected_data = [f"String (кириллица) {i + 1}" for i in range(10)]
         sql = "select StringCol from TestStrings order by IntCol"
         for i in range(5):
             with connection.cursor() as cursor:
@@ -539,8 +539,8 @@ class TestCase(test_env.BaseAsyncTestCase):
         "5338 - test getting db_name"
         async with test_env.get_connection_async() as conn:
             cursor = conn.cursor()
-            await cursor.execute("select name from V$DATABASE")
-            (db_name,) = await cursor.fetchone()
+            await cursor.execute("select instance_name from V$INSTANCE")
+            (db_name, ) = await cursor.fetchone()
             self.assertEqual(conn.db_name.upper(), db_name.upper())
 
     async def test_5339(self):

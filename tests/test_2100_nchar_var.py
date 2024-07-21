@@ -36,10 +36,10 @@ class TestCase(test_env.BaseTestCase):
         self.raw_data = []
         self.data_by_key = {}
         for i in range(1, 11):
-            unicode_col = f"Unicode \u3042 {i}"
-            fixed_char_col = f"Fixed Unicode {i}".ljust(40)
+            unicode_col = f"Unicode (кириллица) \u3042 {i}"
+            fixed_char_col = f"Fixed Unicode (кириллица) {i}".ljust(40)
             if i % 2:
-                nullable_col = f"Nullable {i}"
+                nullable_col = f"Nullable (кириллица) {i}"
             else:
                 nullable_col = None
             data_tuple = (i, unicode_col, fixed_char_col, nullable_col)
@@ -65,7 +65,7 @@ class TestCase(test_env.BaseTestCase):
         self.cursor.setinputsizes(value=oracledb.DB_TYPE_NVARCHAR)
         self.cursor.execute(
             "select * from TestUnicodes where UnicodeCol = :value",
-            value="Unicode \u3042 5",
+            value="Unicode (кириллица) \u3042 5",
         )
         self.assertEqual(self.cursor.fetchall(), [self.data_by_key[5]])
 
@@ -83,7 +83,7 @@ class TestCase(test_env.BaseTestCase):
     def test_2103(self):
         "2103 - test binding in a string after setting input sizes to a number"
         unicode_val = self.cursor.var(oracledb.DB_TYPE_NVARCHAR)
-        unicode_val.setvalue(0, "Unicode \u3042 6")
+        unicode_val.setvalue(0, "Unicode (кириллица) \u3042 6")
         self.cursor.setinputsizes(value=oracledb.NUMBER)
         self.cursor.execute(
             "select * from TestUnicodes where UnicodeCol = :value",
@@ -104,7 +104,7 @@ class TestCase(test_env.BaseTestCase):
         self.cursor.execute(
             statement, retval=return_value, integer_value=5, array=array_var
         )
-        self.assertEqual(return_value.getvalue(), 116)
+        self.assertEqual(return_value.getvalue(), 236)
         array = [f"Unicode - \u3042 {i}" for i in range(15)]
         array_var = self.cursor.arrayvar(oracledb.DB_TYPE_NVARCHAR, array)
         self.cursor.execute(statement, integer_value=8, array=array_var)
@@ -126,7 +126,7 @@ class TestCase(test_env.BaseTestCase):
             integer_value=6,
             array=array,
         )
-        self.assertEqual(return_value.getvalue(), 117)
+        self.assertEqual(return_value.getvalue(), 237)
 
     def test_2106(self):
         "2106 - test binding in a unicode array (with arrayvar)"
@@ -144,13 +144,13 @@ class TestCase(test_env.BaseTestCase):
             integer_value=7,
             array=array,
         )
-        self.assertEqual(return_value.getvalue(), 118)
+        self.assertEqual(return_value.getvalue(), 238)
 
     def test_2107(self):
         "2107 - test binding in/out a unicode array (with arrayvar)"
         array = self.cursor.arrayvar(oracledb.DB_TYPE_NVARCHAR, 10, 100)
         original_data = [r[1] for r in self.raw_data]
-        fmt = "Converted element \u3042 # %d originally had length %d"
+        fmt = "Converted element (кириллица) \u3042 # %d originally had length %d"
         expected_data = [
             fmt % (i, len(original_data[i - 1])) for i in range(1, 6)
         ] + original_data[5:]
@@ -169,7 +169,7 @@ class TestCase(test_env.BaseTestCase):
     def test_2108(self):
         "2108 - test binding out a unicode array (with arrayvar)"
         array = self.cursor.arrayvar(oracledb.DB_TYPE_NVARCHAR, 6, 100)
-        fmt = "Test out element \u3042 # %d"
+        fmt = "Test out element (кириллица) \u3042 # %d"
         expected_data = [fmt % i for i in range(1, 7)]
         self.cursor.execute(
             """
@@ -253,8 +253,8 @@ class TestCase(test_env.BaseTestCase):
             (
                 "UNICODECOL",
                 oracledb.DB_TYPE_NVARCHAR,
-                20,
-                20 * nvarchar_ratio,
+                50,
+                50 * nvarchar_ratio,
                 None,
                 None,
                 False,

@@ -50,7 +50,7 @@ class TestCase(test_env.BaseTestCase):
             self.assertEqual(count, 10)
 
     def __verify_fetched_data(self, connection):
-        expected_data = [f"String {i + 1}" for i in range(10)]
+        expected_data = [f"String (кириллица) {i + 1}" for i in range(10)]
         sql = "select StringCol from TestStrings order by IntCol"
         for i in range(5):
             with connection.cursor() as cursor:
@@ -732,7 +732,7 @@ class TestCase(test_env.BaseTestCase):
         "1138 - test getting db_name"
         conn = test_env.get_connection()
         cursor = conn.cursor()
-        cursor.execute("select name from V$DATABASE")
+        cursor.execute("select instance_name from V$INSTANCE")
         (db_name,) = cursor.fetchone()
         self.assertEqual(conn.db_name.upper(), db_name.upper())
 

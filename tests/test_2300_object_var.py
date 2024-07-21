@@ -155,9 +155,9 @@ class TestCase(test_env.BaseTestCase):
         expected_value = (
             1,
             "First row",
-            "First     ",
+            "First                         ",
             "N First Row",
-            "N First   ",
+            "N First                       ",
             b"Raw Data 1",
             2,
             5,
@@ -170,20 +170,20 @@ class TestCase(test_env.BaseTestCase):
             datetime.datetime(2008, 9, 12, 16, 40),
             datetime.datetime(2009, 10, 13, 17, 50),
             oracledb.Timestamp(2010, 11, 14, 18, 55),
-            "Short CLOB value",
-            "Short NCLOB Value",
-            b"Short BLOB value",
-            (11, "Sub object 1"),
-            [(5, "first element"), (6, "second element")],
+            "Short CLOB value (кириллица)",
+            "Short NCLOB Value (кириллица)",
+            "Short BLOB value (кириллица)".encode(test_env.get_encoding()),
+            (11, "Sub object 1 (кириллица)"),
+            [(5, "first element (кириллица)"), (6, "second element (кириллица)")],
         )
         self.__test_data(1, expected_value, [5, 10, None, 20])
         self.__test_data(2, None, [3, None, 9, 12, 15])
         expected_value = (
             3,
-            "Third row",
-            "Third     ",
-            "N Third Row",
-            "N Third   ",
+            "Third row (кириллица)",
+            "Third (кириллица)             ",
+            "N Third Row (кириллица)",
+            "N Third (кириллица)           ",
             b"Raw Data 3",
             4,
             10,
@@ -196,15 +196,15 @@ class TestCase(test_env.BaseTestCase):
             datetime.datetime(2007, 12, 13, 7, 30, 45),
             datetime.datetime(2017, 6, 21, 23, 18, 45),
             oracledb.Timestamp(2017, 7, 21, 8, 27, 13),
-            "Another short CLOB value",
-            "Another short NCLOB Value",
-            b"Yet another short BLOB value",
-            (13, "Sub object 3"),
+            "Another short CLOB value (кириллица)",
+            "Another short NCLOB Value (кириллица)",
+            "Yet another short BLOB value (кириллица)".encode(test_env.get_encoding(), test_env.get_encoding_errors()),
+            (13, "Sub object 3 (кириллица)"),
             [
-                (10, "element #1"),
-                (20, "element #2"),
-                (30, "element #3"),
-                (40, "element #4"),
+                (10, "element #1 (кириллица)"),
+                (20, "element #2 (кириллица)"),
+                (30, "element #3 (кириллица)"),
+                (40, "element #4 (кириллица)"),
             ],
         )
         self.__test_data(3, expected_value, None)
@@ -361,9 +361,9 @@ class TestCase(test_env.BaseTestCase):
         expected_value = (
             5,
             "A string",
-            "Fixed str ",
+            "Fixed str                     ",
             "A NCHAR string",
-            "Fixed N   ",
+            "Fixed N                       ",
             b"Raw Value",
             27,
             13,
@@ -403,9 +403,9 @@ class TestCase(test_env.BaseTestCase):
         expected_value = (
             5,
             "A string",
-            "Fixed str ",
+            "Fixed str                     ",
             "A NCHAR string",
-            "Fixed N   ",
+            "Fixed N                       ",
             b"Raw Value",
             27,
             13,
@@ -707,11 +707,11 @@ class TestCase(test_env.BaseTestCase):
         typ = self.conn.gettype("UDT_OBJECT")
         obj = typ.newobject()
         for attr_name, max_size in [
-            ("STRINGVALUE", 60),
-            ("FIXEDCHARVALUE", 10),
-            ("NSTRINGVALUE", 120),
-            ("NFIXEDCHARVALUE", 20),
-            ("RAWVALUE", 16),
+            ("STRINGVALUE", 80),
+            ("FIXEDCHARVALUE", 30),
+            ("NSTRINGVALUE", 160),
+            ("NFIXEDCHARVALUE", 60),
+            ("RAWVALUE", 32),
         ]:
             with self.subTest(attr_name=attr_name, max_size=max_size):
                 value = "A" * max_size

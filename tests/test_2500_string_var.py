@@ -40,11 +40,11 @@ class TestCase(test_env.BaseTestCase):
         self.raw_data = []
         self.data_by_key = {}
         for i in range(1, 11):
-            string_col = f"String {i}"
-            fixed_char_col = f"Fixed Char {i}".ljust(40)
-            raw_col = f"Raw {i}".encode("ascii")
+            string_col = f"String (кириллица) {i}"
+            fixed_char_col = f"Fixed Char (кириллица) {i}".ljust(40)
+            raw_col = f"Raw (кириллица) {i}".encode(test_env.get_encoding())
             if i % 2:
-                nullable_col = f"Nullable {i}"
+                nullable_col = f"Nullable (кириллица) {i}"
             else:
                 nullable_col = None
             data_tuple = (i, string_col, raw_col, fixed_char_col, nullable_col)
@@ -68,7 +68,7 @@ class TestCase(test_env.BaseTestCase):
         "2501 - test binding in a string"
         self.cursor.execute(
             "select * from TestStrings where StringCol = :value",
-            value="String 5",
+            value="String (кириллица) 5",
         )
         self.assertEqual(self.cursor.fetchall(), [self.data_by_key[5]])
 
@@ -91,7 +91,7 @@ class TestCase(test_env.BaseTestCase):
         self.cursor.setinputsizes(value=oracledb.NUMBER)
         self.cursor.execute(
             "select * from TestStrings where StringCol = :value",
-            value="String 6",
+            value="String (кириллица) 6",
         )
         self.assertEqual(self.cursor.fetchall(), [self.data_by_key[6]])
 
@@ -107,7 +107,7 @@ class TestCase(test_env.BaseTestCase):
         self.cursor.execute(
             statement, return_value=return_value, integer_value=5, array=array
         )
-        self.assertEqual(return_value.getvalue(), 86)
+        self.assertEqual(return_value.getvalue(), 206)
         array = [f"String - {i}" for i in range(15)]
         self.cursor.execute(statement, integer_value=8, array=array)
         self.assertEqual(return_value.getvalue(), 163)
@@ -128,7 +128,7 @@ class TestCase(test_env.BaseTestCase):
             integer_value=6,
             array=array,
         )
-        self.assertEqual(return_value.getvalue(), 87)
+        self.assertEqual(return_value.getvalue(), 207)
 
     def test_2507(self):
         "2507 - test binding in a string array (with arrayvar)"
@@ -146,14 +146,14 @@ class TestCase(test_env.BaseTestCase):
             integer_value=7,
             array=array,
         )
-        self.assertEqual(return_value.getvalue(), 88)
+        self.assertEqual(return_value.getvalue(), 208)
 
     def test_2508(self):
         "2508 - test binding in/out a string array (with arrayvar)"
         array = self.cursor.arrayvar(oracledb.STRING, 10, 100)
         original_data = [r[1] for r in self.raw_data]
         expected_data = [
-            "Converted element # %d originally had length %d"
+            "Converted element (кириллица) # %d originally had length %d"
             % (i, len(original_data[i - 1]))
             for i in range(1, 6)
         ] + original_data[5:]
@@ -172,7 +172,7 @@ class TestCase(test_env.BaseTestCase):
     def test_2509(self):
         "2509 - test binding out a string array (with arrayvar)"
         array = self.cursor.arrayvar(oracledb.STRING, 6, 100)
-        expected_data = [f"Test out element # {i}" for i in range(1, 7)]
+        expected_data = [f"Test out element (кириллица) # {i}" for i in range(1, 7)]
         self.cursor.execute(
             """
             begin
@@ -189,7 +189,7 @@ class TestCase(test_env.BaseTestCase):
         self.cursor.setinputsizes(value=oracledb.BINARY)
         self.cursor.execute(
             "select * from TestStrings where RawCol = :value",
-            value="Raw 4".encode(),
+            value="Raw (кириллица) 4".encode(test_env.get_encoding()),
         )
         self.assertEqual(self.cursor.fetchall(), [self.data_by_key[4]])
 
@@ -323,8 +323,8 @@ class TestCase(test_env.BaseTestCase):
             (
                 "STRINGCOL",
                 oracledb.DB_TYPE_VARCHAR,
-                20,
-                20 * varchar_ratio,
+                50,
+                50 * varchar_ratio,
                 None,
                 None,
                 False,
@@ -479,7 +479,7 @@ class TestCase(test_env.BaseTestCase):
             """
         )
         (actual_value,) = self.cursor.fetchone()
-        self.assertEqual(actual_value, "<string>String 1</string>")
+        self.assertEqual(actual_value, "<string>String (кириллица) 1</string>")
         self.assertEqual(
             self.cursor.description,
             [("XML", oracledb.DB_TYPE_XMLTYPE, None, None, None, None, True)],
@@ -518,20 +518,22 @@ class TestCase(test_env.BaseTestCase):
     def test_2533(self):
         "2533 - test bypass string decode"
         self.cursor.execute("truncate table TestTempTable")
-        string_val = "I bought a cafetière on the Champs-Élysées"
+        string_val = "I bought a cafetière on the Champs-Élysées. Я купил кафе на Елисейских полях."
+        string_val_bytes = string_val.encode(test_env.get_encoding(), test_env.get_encoding_errors())
+        string_val_expected = string_val_bytes.decode(test_env.get_encoding(), test_env.get_encoding_errors())
         sql = "insert into TestTempTable (IntCol, StringCol1) values (:1, :2)"
         with self.conn.cursor() as cursor:
             cursor.execute(sql, (1, string_val))
             cursor.execute("select IntCol, StringCol1 from TestTempTable")
-            self.assertEqual(cursor.fetchone(), (1, string_val))
+            self.assertEqual(cursor.fetchone(), (1, string_val_expected))
         with self.conn.cursor() as cursor:
             cursor.outputtypehandler = self.__return_strings_as_bytes
             cursor.execute("select IntCol, StringCol1 from TestTempTable")
-            self.assertEqual(cursor.fetchone(), (1, string_val.encode()))
+            self.assertEqual(cursor.fetchone(), (1, string_val_bytes))
         with self.conn.cursor() as cursor:
             cursor.outputtypehandler = None
             cursor.execute("select IntCol, StringCol1 from TestTempTable")
-            self.assertEqual(cursor.fetchone(), (1, string_val))
+            self.assertEqual(cursor.fetchone(), (1, string_val_expected))
 
     @unittest.skipIf(
         not test_env.get_is_thin(),

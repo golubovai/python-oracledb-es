@@ -63,15 +63,17 @@
 # user for on premises databases is SYSTEM.
 # -----------------------------------------------------------------------------
 
+from dotenv import load_dotenv
+load_dotenv()
+
 import getpass
 import os
 import sys
 import unittest
 
-from dotenv import load_dotenv
-load_dotenv()
-
 import oracledb
+
+oracledb.defaults.config_dir = os.getenv('TNS_ADMIN')
 
 # Python 3.7 doesn't have support for testing asyncio so fake it to avoid the
 # entire test suite failing!
@@ -108,6 +110,16 @@ def get_value(name, label, default_value=None, password=False):
         value = default_value
     PARAMETERS[name] = value
     return value
+
+
+def get_encoding():
+    return get_value("ENCODING", 'Client encoding', 'utf-8')
+
+def get_encoding_errors():
+    return get_value("ENCODING_ERRORS", 'Client encoding', 'strict')
+
+print(f'Set encoding: {get_encoding()} / {get_encoding_errors()}')
+oracledb.set_encoding(get_encoding(), get_encoding_errors())
 
 
 def get_admin_connection(use_async=False):
@@ -403,7 +415,7 @@ def run_sql_script(conn, script_name, **kwargs):
     ]
     script_dir = os.path.dirname(os.path.abspath(sys.argv[0]))
     file_name = os.path.join(script_dir, "sql", script_name + ".sql")
-    for line in open(file_name):
+    for line in open(file_name, encoding="utf-8"):
         if line.strip() == "/":
             statement = "".join(statement_parts).strip()
             if statement:
