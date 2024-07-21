@@ -25,6 +25,9 @@ Thin Mode Changes
     ``wait_timeout`` value and the connection request will not additionally be
     delayed by any internal network ping to the database (`issue 330
     <https://github.com/oracle/python-oracledb/issues/330>`__).
+#)  Fixed bug when calling :meth:`oracledb.connect_async()` multiple times
+    concurrently
+    (`issue 353 <https://github.com/oracle/python-oracledb/issues/353>`__).
 #)  Fixed bug in fetching dates with years less than 0
     (`issue 345 <https://github.com/oracle/python-oracledb/issues/345>`__).
 
@@ -34,6 +37,8 @@ Thick Mode Changes
 
 #)  Eliminated memory leak when dequeing messages with JSON payloads
     (`issue 346 <https://github.com/oracle/python-oracledb/issues/346>`__).
+#)  An exception is now avoided if an error message is not correctly UTF-8
+    encoded by the database.
 
 Common Changes
 ++++++++++++++
@@ -80,6 +85,9 @@ Common Changes
     when operations are attempted on BFILE LOBs that are not permitted.
     Previously, ``ORA-22275: invalid LOB locator specified`` was raised
     instead.
+#)  Error ``DPY-3026: operation is only supported on BFILE LOBs`` is now raised
+    when operations are attempted on LOBs that are only supported by BFILE
+    LOBs. Previously, ``DPI-1002: invalid OCI handle`` was raised instead.
 #)  Error ``DPY-4005: timed out waiting for the connection pool to return a
     connection`` is now raised consistently when using get mode
     :data:`oracledb.POOL_GETMODE_TIMEDWAIT` and the timeout expires.
