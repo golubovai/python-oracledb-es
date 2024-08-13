@@ -561,7 +561,7 @@ cdef class ReadBuffer(Buffer):
             input_offset += 1
             input_len -= 3
 
-        return bytes(output_value).decode(get_encoding(), get_encoding_errors())
+        return bytes(output_value).decode(ENCODING, ENCODING_ERRORS)
 
     cdef object read_vector(self):
         """

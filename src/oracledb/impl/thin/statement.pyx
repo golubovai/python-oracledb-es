@@ -392,7 +392,7 @@ cdef class Statement:
 
         # retain normalized SQL (as string and bytes) as well as the length
         self._sql = sql
-        self._sql_bytes = self._sql.encode(get_encoding(), get_encoding_errors())
+        self._sql_bytes = self._sql.encode(ENCODING, ENCODING_ERRORS)
         self._sql_length = <uint32_t> len(self._sql_bytes)
 
         # parse SQL and populate bind variable list (bind by position) and dict

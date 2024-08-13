@@ -114,7 +114,7 @@ cdef class DbObjectPickleBuffer(GrowableBuffer):
         bytes_left = self.bytes_left()
         ptr = self.read_raw_bytes(bytes_left)
         if xml_flag & TNS_XML_TYPE_STRING:
-            return ptr[:bytes_left].decode(get_encoding(), get_encoding_errors())
+            return ptr[:bytes_left].decode(ENCODING, ENCODING_ERRORS)
         elif xml_flag & TNS_XML_TYPE_LOB:
             lob_impl = conn_impl._create_lob_impl(DB_TYPE_CLOB,
                                                   ptr[:bytes_left])
@@ -260,12 +260,12 @@ cdef class ThinDbObjectImpl(BaseDbObjectImpl):
                 buf.write_uint8(TNS_NULL_LENGTH_INDICATOR)
         elif ora_type_num in (TNS_DATA_TYPE_CHAR, TNS_DATA_TYPE_VARCHAR):
             if dbtype._csfrm == CS_FORM_IMPLICIT:
-                temp_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
+                temp_bytes = (<str> value).encode(ENCODING, ENCODING_ERRORS)
             else:
                 temp_bytes = (<str> value).encode(CS_ENCODING_UTF16)
             buf.write_bytes_with_length(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_NUMBER:
-            temp_bytes = (<str> cpython.PyObject_Str(value)).encode(get_encoding(), get_encoding_errors())
+            temp_bytes = (<str> cpython.PyObject_Str(value)).encode(ENCODING, ENCODING_ERRORS)
             buf.write_oracle_number(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_BINARY_INTEGER:
             buf.write_uint8(4)

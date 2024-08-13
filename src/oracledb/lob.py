@@ -30,8 +30,7 @@
 
 from typing import Any, Union
 
-from .base_impl import DB_TYPE_BFILE, DB_TYPE_BLOB, \
-    get_encoding_ as get_encoding, get_encoding_errors_ as get_encoding_errors
+from .base_impl import DB_TYPE_BFILE, DB_TYPE_BLOB, get_encoding, get_encoding_errors
 from . import __name__ as MODULE_NAME
 from . import errors
 

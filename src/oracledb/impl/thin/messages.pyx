@@ -548,7 +548,7 @@ cdef class MessageWithData(Message):
             if var_impl.encoding_errors is not None:
                 encoding_errors = var_impl.encoding_errors
             else:
-                encoding_errors = get_encoding_errors()
+                encoding_errors = ENCODING_ERRORS
             column_value = buf.read_str(csfrm, encoding_errors)
         elif ora_type_num == TNS_DATA_TYPE_RAW \
                 or ora_type_num == TNS_DATA_TYPE_LONG_RAW:
@@ -907,9 +907,9 @@ cdef class MessageWithData(Message):
                 buf.skip_raw_bytes_chunked()
             buf.read_ub2(&keyword_num)      # keyword num
             if keyword_num == TNS_KEYWORD_NUM_CURRENT_SCHEMA:
-                self.conn_impl._current_schema = key_value.decode(get_encoding(), get_encoding_errors())
+                self.conn_impl._current_schema = key_value.decode(ENCODING, ENCODING_ERRORS)
             elif keyword_num == TNS_KEYWORD_NUM_EDITION:
-                self.conn_impl._edition = key_value.decode(get_encoding(), get_encoding_errors())
+                self.conn_impl._edition = key_value.decode(ENCODING, ENCODING_ERRORS)
         buf.read_ub2(&num_bytes)            # registration
         if num_bytes > 0:
             buf.skip_raw_bytes(num_bytes)
@@ -1021,7 +1021,7 @@ cdef class MessageWithData(Message):
                 buf.write_ub4(0)            # OID
                 buf.write_ub2(0)            # version
             if var_impl.dbtype._csfrm != 0:
-                buf.write_ub2(get_charset_id())
+                buf.write_ub2(CHARSET_ID)
             else:
                 buf.write_ub2(0)
             buf.write_uint8(var_impl.dbtype._csfrm)
@@ -1056,7 +1056,7 @@ cdef class MessageWithData(Message):
                 or ora_type_num == TNS_DATA_TYPE_CHAR \
                 or ora_type_num == TNS_DATA_TYPE_LONG:
             if var_impl.dbtype._csfrm == CS_FORM_IMPLICIT:
-                temp_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
+                temp_bytes = (<str> value).encode(ENCODING, ENCODING_ERRORS)
             else:
                 buf._caps._check_ncharset_id()
                 temp_bytes = (<str> value).encode(CS_ENCODING_UTF16)
@@ -1069,7 +1069,7 @@ cdef class MessageWithData(Message):
             if isinstance(value, bool):
                 temp_bytes = b'1' if value is True else b'0'
             else:
-                temp_bytes = (<str> cpython.PyObject_Str(value)).encode(get_encoding(), get_encoding_errors())
+                temp_bytes = (<str> cpython.PyObject_Str(value)).encode(ENCODING, ENCODING_ERRORS)
             buf.write_oracle_number(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_DATE \
                 or ora_type_num == TNS_DATA_TYPE_TIMESTAMP \
@@ -1104,7 +1104,7 @@ cdef class MessageWithData(Message):
             ):
             buf.write_lob_with_length(value._impl)
         elif ora_type_num in (TNS_DATA_TYPE_ROWID, TNS_DATA_TYPE_UROWID):
-            temp_bytes = (<str> value).encode(get_encoding(), get_encoding_errors())
+            temp_bytes = (<str> value).encode(ENCODING, ENCODING_ERRORS)
             buf.write_bytes_with_length(temp_bytes)
         elif ora_type_num == TNS_DATA_TYPE_INT_NAMED:
             buf.write_dbobject(value._impl)
@@ -1162,7 +1162,7 @@ cdef class MessageWithData(Message):
         cdef bytes schema_bytes
         self._write_piggyback_code(buf, TNS_FUNC_SET_SCHEMA)
         buf.write_uint8(1)                  # pointer
-        schema_bytes = self.conn_impl._current_schema.encode(get_encoding(), get_encoding_errors())
+        schema_bytes = self.conn_impl._current_schema.encode(ENCODING, ENCODING_ERRORS)
         buf.write_ub4(len(schema_bytes))
         buf.write_bytes_with_length(schema_bytes)
 
@@ -1236,7 +1236,7 @@ cdef class MessageWithData(Message):
             if conn_impl._client_identifier is None:
                 buf.write_ub4(0)
             else:
-                client_identifier_bytes = conn_impl._client_identifier.encode(get_encoding(), get_encoding_errors())
+                client_identifier_bytes = conn_impl._client_identifier.encode(ENCODING, ENCODING_ERRORS)
                 buf.write_ub4(len(client_identifier_bytes))
         else:
             buf.write_uint8(0)              # pointer (client identifier)
@@ -1248,7 +1248,7 @@ cdef class MessageWithData(Message):
             if conn_impl._module is None:
                 buf.write_ub4(0)
             else:
-                module_bytes = conn_impl._module.encode(get_encoding(), get_encoding_errors())
+                module_bytes = conn_impl._module.encode(ENCODING, ENCODING_ERRORS)
                 buf.write_ub4(len(module_bytes))
         else:
             buf.write_uint8(0)              # pointer (module)
@@ -1260,7 +1260,7 @@ cdef class MessageWithData(Message):
             if conn_impl._action is None:
                 buf.write_ub4(0)
             else:
-                action_bytes = conn_impl._action.encode(get_encoding(), get_encoding_errors())
+                action_bytes = conn_impl._action.encode(ENCODING, ENCODING_ERRORS)
                 buf.write_ub4(len(action_bytes))
         else:
             buf.write_uint8(0)              # pointer (action)
@@ -1278,7 +1278,7 @@ cdef class MessageWithData(Message):
             if conn_impl._client_info is None:
                 buf.write_ub4(0)
             else:
-                client_info_bytes = conn_impl._client_info.encode(get_encoding(), get_encoding_errors())
+                client_info_bytes = conn_impl._client_info.encode(ENCODING, ENCODING_ERRORS)
                 buf.write_ub4(len(client_info_bytes))
         else:
             buf.write_uint8(0)              # pointer (client info)
@@ -1296,7 +1296,7 @@ cdef class MessageWithData(Message):
             if conn_impl._dbop is None:
                 buf.write_ub4(0)
             else:
-                dbop_bytes = conn_impl._dbop.encode(get_encoding(), get_encoding_errors())
+                dbop_bytes = conn_impl._dbop.encode(ENCODING, ENCODING_ERRORS)
                 buf.write_ub4(len(dbop_bytes))
         else:
             buf.write_uint8(0)              # pointer (dbop)
@@ -1509,7 +1509,7 @@ cdef class AuthMessage(Message):
             salt = bytes.fromhex(self.session_data['AUTH_PBKDF2_CSK_SALT'])
             iterations = int(self.session_data['AUTH_PBKDF2_SDER_COUNT'])
             temp_key = session_key_part_b[:keylen] + session_key_part_a[:keylen]
-            combo_key = get_derived_key(temp_key.hex().upper().encode(get_encoding(), get_encoding_errors()), salt,
+            combo_key = get_derived_key(temp_key.hex().upper().encode(ENCODING, ENCODING_ERRORS), salt,
                                         keylen, iterations)
 
         # retain session key for use by the change password API
@@ -1527,7 +1527,7 @@ cdef class AuthMessage(Message):
         # check if debug_jdwp is set. if set, encode the data using the
         # combo session key with zeros padding
         if self.debug_jdwp is not None:
-            jdwp_data = self.debug_jdwp.encode(get_encoding(), get_encoding_errors())
+            jdwp_data = self.debug_jdwp.encode(ENCODING, ENCODING_ERRORS)
             encrypted_jdwp_data = encrypt_cbc(combo_key, jdwp_data, zeros=True)
             # Add a "01" at the end of the hex encrypted data to indicate the
             # use of AES encryption
@@ -1581,7 +1581,7 @@ cdef class AuthMessage(Message):
         self.function_code = TNS_FUNC_AUTH_PHASE_ONE
         self.session_data = {}
         if self.conn_impl.username is not None:
-            self.user_bytes = self.conn_impl.username.encode(get_encoding(), get_encoding_errors())
+            self.user_bytes = self.conn_impl.username.encode(ENCODING, ENCODING_ERRORS)
             self.user_bytes_len = len(self.user_bytes)
         self.resend = True
 
@@ -1683,8 +1683,8 @@ cdef class AuthMessage(Message):
     cdef int _write_key_value(self, WriteBuffer buf, str key, str value,
                               uint32_t flags=0) except -1:
         cdef:
-            bytes key_bytes = key.encode(get_encoding(), get_encoding_errors())
-            bytes value_bytes = value.encode(get_encoding(), get_encoding_errors())
+            bytes key_bytes = key.encode(ENCODING, ENCODING_ERRORS)
+            bytes value_bytes = value.encode(ENCODING, ENCODING_ERRORS)
             uint32_t key_len = <uint32_t> len(key_bytes)
             uint32_t value_len = <uint32_t> len(value_bytes)
         buf.write_ub4(key_len)
@@ -1780,7 +1780,7 @@ cdef class AuthMessage(Message):
                 self._write_key_value(buf, "AUTH_NEWPASSWORD",
                                       self.encoded_newpassword)
             if not self.change_password:
-                self._write_key_value(buf, "SESSION_CLIENT_CHARSET", str(get_charset_id()))
+                self._write_key_value(buf, "SESSION_CLIENT_CHARSET", str(CHARSET_ID))
                 driver_name = f"{DRIVER_NAME} thin : {DRIVER_VERSION}"
                 self._write_key_value(buf, "SESSION_CLIENT_DRIVER_NAME",
                                       driver_name)
@@ -1818,7 +1818,7 @@ cdef class ChangePasswordMessage(AuthMessage):
         """
         self.change_password = True
         self.function_code = TNS_FUNC_AUTH_PHASE_TWO
-        self.user_bytes = self.conn_impl.username.encode(get_encoding(), get_encoding_errors())
+        self.user_bytes = self.conn_impl.username.encode(ENCODING, ENCODING_ERRORS)
         self.user_bytes_len = len(self.user_bytes)
         self.auth_mode = TNS_AUTH_MODE_WITH_PASSWORD | \
                 TNS_AUTH_MODE_CHANGE_PASSWORD
@@ -1860,7 +1860,7 @@ cdef class ConnectMessage(Message):
             redirect_data = buf.read_raw_bytes(self.redirect_data_len)
             if self.redirect_data_len > 0:
                 self.redirect_data = \
-                        redirect_data[:self.redirect_data_len].decode(get_encoding(), get_encoding_errors())
+                        redirect_data[:self.redirect_data_len].decode(ENCODING, ENCODING_ERRORS)
             self.read_redirect_data_len = False
         elif buf._current_packet.packet_type == TNS_PACKET_TYPE_ACCEPT:
             buf.read_uint16(&protocol_version)
@@ -1961,8 +1961,8 @@ cdef class DataTypesMessage(Message):
 
         # write character set and capabilities
         buf.write_uint8(TNS_MSG_TYPE_DATA_TYPES)
-        buf.write_uint16(get_charset_id(), BYTE_ORDER_LSB)
-        buf.write_uint16(get_charset_id(), BYTE_ORDER_LSB)
+        buf.write_uint16(CHARSET_ID, BYTE_ORDER_LSB)
+        buf.write_uint16(CHARSET_ID, BYTE_ORDER_LSB)
         buf.write_uint8(TNS_ENCODING_MULTI_BYTE | TNS_ENCODING_CONV_LENGTH)
         buf.write_bytes_with_length(bytes(buf._caps.compile_caps))
         buf.write_bytes_with_length(bytes(buf._caps.runtime_caps))
@@ -2267,7 +2267,7 @@ cdef class LobOpMessage(Message):
                 self.data = ptr[:num_bytes]
             else:
                 encoding = self.source_lob_impl._get_encoding()
-                self.data = ptr[:num_bytes].decode(encoding, get_encoding_errors())
+                self.data = ptr[:num_bytes].decode(encoding, ENCODING_ERRORS)
         else:
             Message._process_message(self, buf, message_type)
 
@@ -2344,7 +2344,7 @@ cdef class LobOpMessage(Message):
                 buf._caps._check_ncharset_id()
                 buf.write_ub4(TNS_CHARSET_UTF16)
             else:
-                buf.write_ub4(get_charset_id())
+                buf.write_ub4(CHARSET_ID)
         if self.data is not None:
             buf.write_uint8(TNS_MSG_TYPE_LOB_DATA)
             buf.write_bytes_with_length(self.data)
@@ -2544,10 +2544,10 @@ cdef class TransactionChangeStateMessage(Message):
             format_id = self.xid[0]
             global_transaction_id = self.xid[1] \
                     if isinstance(self.xid[1], bytes) \
-                    else self.xid[1].encode(get_encoding(), get_encoding_errors())
+                    else self.xid[1].encode(ENCODING, ENCODING_ERRORS)
             branch_qualifier = self.xid[2] \
                     if isinstance(self.xid[2], bytes) \
-                    else self.xid[2].encode(get_encoding(), get_encoding_errors())
+                    else self.xid[2].encode(ENCODING, ENCODING_ERRORS)
             xid_bytes = global_transaction_id + branch_qualifier
             xid_bytes += bytes(128 - len(xid_bytes))
 
@@ -2623,16 +2623,16 @@ cdef class TransactionSwitchMessage(Message):
             format_id = self.xid[0]
             global_transaction_id = self.xid[1] \
                     if isinstance(self.xid[1], bytes) \
-                    else self.xid[1].encode(get_encoding(), get_encoding_errors())
+                    else self.xid[1].encode(ENCODING, ENCODING_ERRORS)
             branch_qualifier = self.xid[2] \
                     if isinstance(self.xid[2], bytes) \
-                    else self.xid[2].encode(get_encoding(), get_encoding_errors())
+                    else self.xid[2].encode(ENCODING, ENCODING_ERRORS)
             xid_bytes = global_transaction_id + branch_qualifier
             xid_bytes += bytes(128 - len(xid_bytes))
         if self.conn_impl._internal_name is not None:
-            internal_name = self.conn_impl._internal_name.encode(get_encoding(), get_encoding_errors())
+            internal_name = self.conn_impl._internal_name.encode(ENCODING, ENCODING_ERRORS)
         if self.conn_impl._external_name is not None:
-            external_name = self.conn_impl._external_name.encode(get_encoding(), get_encoding_errors())
+            external_name = self.conn_impl._external_name.encode(ENCODING, ENCODING_ERRORS)
 
         # write message
         self._write_function_code(buf)
@@ -2667,7 +2667,7 @@ cdef class TransactionSwitchMessage(Message):
             buf.write_uint8(0)              # pointer (internal name)
             buf.write_ub4(0)                # length of internal name
         if external_name is not None:
-            external_name = self.conn_impl._external_name.encode(get_encoding(), get_encoding_errors())
+            external_name = self.conn_impl._external_name.encode(ENCODING, ENCODING_ERRORS)
             buf.write_uint8(1)              # pointer (external name)
             buf.write_ub4(len(external_name))
         else:

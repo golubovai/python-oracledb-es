@@ -795,6 +795,7 @@ cdef void pack_uint32(char_type *buf, uint32_t x, int order)
 cdef void pack_uint64(char_type *buf, uint64_t x, int order)
 cdef uint16_t unpack_uint16(const char_type *buf, int order)
 cdef uint32_t unpack_uint32(const char_type *buf, int order)
-cdef str get_encoding()
-cdef str get_encoding_errors()
-cdef int get_charset_id()
+
+cdef str ENCODING
+cdef str ENCODING_ERRORS
+cdef int CHARSET_ID

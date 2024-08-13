@@ -75,12 +75,12 @@ cdef class BaseConnImpl:
                              DB_TYPE_NUM_LONG_VARCHAR,
                              DB_TYPE_NUM_LONG_NVARCHAR):
             if isinstance(value, bytes):
-                return (<bytes> value).decode(get_encoding(), get_encoding_errors())
+                return (<bytes> value).decode(ENCODING, ENCODING_ERRORS)
             elif isinstance(value, str):
                 return value
         elif db_type_num in (DB_TYPE_NUM_RAW, DB_TYPE_NUM_LONG_RAW):
             if isinstance(value, str):
-                return (<str> value).encode(get_encoding(), get_encoding_errors())
+                return (<str> value).encode(ENCODING, ENCODING_ERRORS)
             elif isinstance(value, bytes):
                 return value
         elif db_type_num in (DB_TYPE_NUM_DATE,
@@ -112,7 +112,7 @@ cdef class BaseConnImpl:
                     and isinstance(value, (bytes, str)):
                 if db_type_num == DB_TYPE_NUM_BLOB:
                     if isinstance(value, str):
-                        value = value.encode(get_encoding(), get_encoding_errors())
+                        value = value.encode(ENCODING, ENCODING_ERRORS)
                 elif isinstance(value, bytes):
                     value = value.decode()
                 lob_impl = self.create_temp_lob_impl(dbtype)

@@ -172,7 +172,7 @@ cdef class BaseThinConnImpl(BaseConnImpl):
         if self._cclass is None and self._pool is not None \
                 and self._drcp_enabled:
             gen_uuid = uuid.uuid4()
-            self._cclass = f"DPY:{base64.b64encode(gen_uuid.bytes).decode(get_encoding(), get_encoding_errors())}"
+            self._cclass = f"DPY:{base64.b64encode(gen_uuid.bytes).decode(ENCODING, ENCODING_ERRORS)}"
             params._default_description.cclass = self._cclass
 
     cdef int _post_connect_phase_two(self, ConnectParamsImpl params) except -1:
@@ -191,7 +191,7 @@ cdef class BaseThinConnImpl(BaseConnImpl):
         Called before the connection is established to perform common tasks.
         """
         params._check_credentials()
-        self._connection_id = base64.b64encode(secrets.token_bytes(16)).decode(get_encoding(), get_encoding_errors())
+        self._connection_id = base64.b64encode(secrets.token_bytes(16)).decode(ENCODING, ENCODING_ERRORS)
 
     cdef int _return_statement(self, Statement statement) except -1:
         """
@@ -391,8 +391,8 @@ cdef class ThinConnImpl(BaseThinConnImpl):
             Protocol protocol = <Protocol> self._protocol
             ChangePasswordMessage message
         message = self._create_message(ChangePasswordMessage)
-        message.password = old_password.encode(get_encoding(), get_encoding_errors())
-        message.newpassword = new_password.encode(get_encoding(), get_encoding_errors())
+        message.password = old_password.encode(ENCODING, ENCODING_ERRORS)
+        message.newpassword = new_password.encode(ENCODING, ENCODING_ERRORS)
         protocol._process_single_message(message)
 
     def close(self, bint in_del=False):
@@ -603,8 +603,8 @@ cdef class AsyncThinConnImpl(BaseThinConnImpl):
             BaseAsyncProtocol protocol = <BaseAsyncProtocol> self._protocol
             ChangePasswordMessage message
         message = self._create_message(ChangePasswordMessage)
-        message.password = old_password.encode(get_encoding(), get_encoding_errors())
-        message.newpassword = new_password.encode(get_encoding(), get_encoding_errors())
+        message.password = old_password.encode(ENCODING, ENCODING_ERRORS)
+        message.newpassword = new_password.encode(ENCODING, ENCODING_ERRORS)
         await protocol._process_single_message(message)
 
     async def close(self, bint in_del=False):

@@ -237,7 +237,7 @@ cdef class AsyncThinCursorImpl(BaseThinCursorImpl):
             if isinstance(value, PY_TYPE_ASYNC_LOB):
                 value = await value.read()
             if isinstance(value, bytes):
-                value = value.decode(get_encoding(), get_encoding_errors())
+                value = value.decode(ENCODING, ENCODING_ERRORS)
             return json.loads(value)
         return converter
 

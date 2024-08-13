@@ -87,7 +87,7 @@ cdef object _encode_rowid(Rowid *rowid):
         offset = _convert_base64(buf, rowid.partition_id, 3, offset)
         offset = _convert_base64(buf, rowid.block_num, 6, offset)
         offset = _convert_base64(buf, rowid.slot_num, 3, offset)
-        return buf[:TNS_MAX_ROWID_LENGTH].decode(get_encoding(), get_encoding_errors())
+        return buf[:TNS_MAX_ROWID_LENGTH].decode(ENCODING, ENCODING_ERRORS)
 
 
 cdef str _get_connect_data(Description description, str connection_id):

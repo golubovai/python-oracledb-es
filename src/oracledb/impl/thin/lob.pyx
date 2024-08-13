@@ -152,7 +152,7 @@ cdef class BaseThinLobImpl(BaseLobImpl):
                 raise TypeError(
                     "only strings can be written to CLOBs and NCLOBS"
                 )
-            message.data = value.encode(self._get_encoding(), get_encoding_errors())
+            message.data = value.encode(self._get_encoding(), ENCODING_ERRORS)
         return message
 
     cdef LobOpMessage _create_file_exists_message(self):
@@ -205,7 +205,7 @@ cdef class BaseThinLobImpl(BaseLobImpl):
                 or self._locator[TNS_LOB_LOC_OFFSET_FLAG_3] & \
                 TNS_LOB_LOC_FLAGS_VAR_LENGTH_CHARSET:
             return CS_ENCODING_UTF16
-        return get_encoding()
+        return ENCODING
 
     def free_lob(self):
         """
@@ -243,8 +243,8 @@ cdef class BaseThinLobImpl(BaseLobImpl):
         file_name_len = unpack_uint16(&ptr[dir_name_offset + dir_name_len],
                                       BYTE_ORDER_MSB)
         return (
-            ptr[dir_name_offset:dir_name_offset + dir_name_len].decode(get_encoding(), get_encoding_errors()),
-            ptr[file_name_offset:file_name_offset + file_name_len].decode(get_encoding(), get_encoding_errors())
+            ptr[dir_name_offset:dir_name_offset + dir_name_len].decode(ENCODING, ENCODING_ERRORS),
+            ptr[file_name_offset:file_name_offset + file_name_len].decode(ENCODING, ENCODING_ERRORS)
         )
 
     def set_file_name(self, str dir_alias, str name):
@@ -257,8 +257,8 @@ cdef class BaseThinLobImpl(BaseLobImpl):
         pack_uint16(dir_length, len(dir_alias), BYTE_ORDER_MSB)
         pack_uint16(name_length, len(name), BYTE_ORDER_MSB)
         self._locator = self._locator[:TNS_LOB_LOC_FIXED_OFFSET] + \
-                dir_length[:2] + dir_alias.encode(get_encoding(), get_encoding_errors()) + name_length[:2] + \
-                name.encode(get_encoding(), get_encoding_errors())
+                dir_length[:2] + dir_alias.encode(ENCODING, ENCODING_ERRORS) + name_length[:2] + \
+                name.encode(ENCODING, ENCODING_ERRORS)
 
 
 cdef class ThinLobImpl(BaseThinLobImpl):

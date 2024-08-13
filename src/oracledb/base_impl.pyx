@@ -148,35 +148,26 @@ charset_map = {'ascii': 1,
                'utf-8': 873,
                'utf-16be': 2000,}
 
-cdef str _encoding = "UTF-8"
-cdef int _charset_id = 873
-cdef str _encoding_errors = "strict"
+cdef str ENCODING = "UTF-8"
+cdef str ENCODING_ERRORS = "strict"
+cdef int CHARSET_ID = 873
 
-cdef str get_encoding():
-    return _encoding
-
-cdef str get_encoding_errors():
-    return _encoding_errors
-
-cdef int get_charset_id():
-    return _charset_id
-
-def set_encoding_(encoding, errors = "strict"):
-    global _encoding, _charset_id, _encoding_errors
+def set_encoding(encoding, errors = "strict"):
+    global ENCODING, ENCODING_ERRORS, CHARSET_ID
     info = codecs.lookup(encoding)
-    _encoding = encoding
-    _charset_id = charset_map[info.name]
+    ENCODING = encoding
+    CHARSET_ID = charset_map[info.name]
     if errors in ("strict", "ignore", "replace"):
-        _encoding_errors = errors
+        ENCODING_ERRORS = errors
 
-def get_encoding_():
-    return _encoding
+def get_encoding():
+    return ENCODING
 
-def get_encoding_errors_():
-    return _encoding_errors
+def get_encoding_errors():
+    return ENCODING_ERRORS
 
-def get_charset_id_():
-    return _charset_id
+def get_charset_id():
+    return CHARSET_ID
 
 include "impl/base/constants.pxi"
 include "impl/base/defaults.pyx"

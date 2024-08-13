@@ -81,10 +81,10 @@ from .base_impl import (
     NUMBER as NUMBER,
     ROWID as ROWID,
     STRING as STRING,
-    set_encoding_ as set_encoding,
-    get_encoding_ as get_encoding,
-    get_encoding_errors_ as get_encoding_errors,
-    get_charset_id_ as get_charset_id,
+    set_encoding,
+    get_encoding,
+    get_encoding_errors,
+    get_charset_id,
 )
 
 from .enums import (

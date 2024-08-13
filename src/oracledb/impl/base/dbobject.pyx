@@ -39,7 +39,7 @@ cdef class BaseDbObjectImpl:
         violated[0] = False
         if max_size > 0 and value is not None:
             if isinstance(value, str):
-                actual_size[0] = len((<str> value).encode(get_encoding(), get_encoding_errors()))
+                actual_size[0] = len((<str> value).encode(ENCODING, ENCODING_ERRORS))
             else:
                 actual_size[0] = len(<bytes> value)
             if actual_size[0] > max_size:

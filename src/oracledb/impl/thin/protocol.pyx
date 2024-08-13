@@ -237,7 +237,7 @@ cdef class Protocol(BaseProtocol):
                 connect_message.host = host
                 connect_message.port = port
                 connect_message.description = description
-                connect_message.connect_string_bytes = connect_string.encode(get_encoding(), get_encoding_errors())
+                connect_message.connect_string_bytes = connect_string.encode(ENCODING, ENCODING_ERRORS)
                 connect_message.connect_string_len = \
                         <uint16_t> len(connect_message.connect_string_bytes)
                 connect_message.packet_flags = packet_flags
@@ -351,7 +351,7 @@ cdef class Protocol(BaseProtocol):
                 errors._raise_err(errors.ERR_ACCESS_TOKEN_REQUIRES_TCPS)
         if description.use_tcp_fast_open:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.sendto(connect_string.encode(get_encoding(), get_encoding_errors()),
+            sock.sendto(connect_string.encode(ENCODING, ENCODING_ERRORS),
                         socket.MSG_FASTOPEN,
                         connect_info)
         else:
@@ -360,12 +360,12 @@ cdef class Protocol(BaseProtocol):
         # complete connection through proxy, if applicable
         if use_proxy:
             data = f"CONNECT {host}:{port} HTTP/1.0\r\n\r\n"
-            sock.send(data.encode(get_encoding(), get_encoding_errors()))
+            sock.send(data.encode(ENCODING, ENCODING_ERRORS))
             reply = sock.recv(1024)
-            m = re.search('HTTP/1.[01]\\s+(\\d+)\\s+', reply.decode(get_encoding(), get_encoding_errors()))
+            m = re.search('HTTP/1.[01]\\s+(\\d+)\\s+', reply.decode(ENCODING, ENCODING_ERRORS))
             if m is None or m.groups()[0] != '200':
                 errors._raise_err(errors.ERR_PROXY_FAILURE,
-                                  response=reply.decode(get_encoding(), get_encoding_errors()))
+                                  response=reply.decode(ENCODING, ENCODING_ERRORS))
 
         # set socket on transport
         self._transport.set_from_socket(sock, params, description, address)
@@ -458,7 +458,7 @@ cdef class Protocol(BaseProtocol):
                 message.error_info.message = None
             else:
                 ptr = buf.read_raw_bytes(refuse_message_len)
-                message.error_info.message = ptr[:refuse_message_len].decode(get_encoding(), get_encoding_errors())
+                message.error_info.message = ptr[:refuse_message_len].decode(ENCODING, ENCODING_ERRORS)
 
     cdef int _reset(self, Message message) except -1:
         cdef uint8_t marker_type, packet_type
@@ -586,7 +586,7 @@ cdef class BaseAsyncProtocol(BaseProtocol):
                 connect_message.host = host
                 connect_message.port = port
                 connect_message.description = description
-                connect_message.connect_string_bytes = connect_string.encode(get_encoding(), get_encoding_errors())
+                connect_message.connect_string_bytes = connect_string.encode(ENCODING, ENCODING_ERRORS)
                 connect_message.connect_string_len = \
                         <uint16_t> len(connect_message.connect_string_bytes)
                 connect_message.packet_flags = packet_flags
@@ -707,12 +707,12 @@ cdef class BaseAsyncProtocol(BaseProtocol):
         # complete connection through proxy, if applicable
         if use_proxy:
             data = f"CONNECT {host}:{port} HTTP/1.0\r\n\r\n"
-            transport.write(data.encode(get_encoding(), get_encoding_errors()))
+            transport.write(data.encode(ENCODING, ENCODING_ERRORS))
             reply = transport.read(1024)
-            m = re.search('HTTP/1.[01]\\s+(\\d+)\\s+', reply.decode(get_encoding(), get_encoding_errors()))
+            m = re.search('HTTP/1.[01]\\s+(\\d+)\\s+', reply.decode(ENCODING, ENCODING_ERRORS))
             if m is None or m.groups()[0] != '200':
                 errors._raise_err(errors.ERR_PROXY_FAILURE,
-                                  response=reply.decode(get_encoding(), get_encoding_errors()))
+                                  response=reply.decode(ENCODING, ENCODING_ERRORS))
 
         # set socket on transport
         self._transport.set_from_socket(transport, params, description,
@@ -828,7 +828,7 @@ cdef class BaseAsyncProtocol(BaseProtocol):
                 message.error_info.message = None
             else:
                 ptr = buf.read_raw_bytes(refuse_message_len)
-                message.error_info.message = ptr[:refuse_message_len].decode(get_encoding(), get_encoding_errors())
+                message.error_info.message = ptr[:refuse_message_len].decode(ENCODING, ENCODING_ERRORS)
 
     async def _reset(self):
         cdef uint8_t marker_type, packet_type
