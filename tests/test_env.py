@@ -70,6 +70,7 @@ import getpass
 import os
 import sys
 import unittest
+import time
 
 import oracledb
 
@@ -118,8 +119,10 @@ def get_encoding():
 def get_encoding_errors():
     return get_value("ENCODING_ERRORS", 'Client encoding', 'strict')
 
-print(f'Set encoding: {get_encoding()} / {get_encoding_errors()}')
-oracledb.set_encoding(get_encoding(), get_encoding_errors())
+
+if hasattr(oracledb, "set_encoding"):
+    print(f'Set encoding: {get_encoding()} / {get_encoding_errors()}')
+    oracledb.set_encoding(get_encoding(), get_encoding_errors())
 
 
 def get_admin_connection(use_async=False):
@@ -452,8 +455,39 @@ def run_sql_script(conn, script_name, **kwargs):
         print("    %s/%s %s" % (line_num, position, text))
 
 
+class TimeLoggingTestResult(unittest.TextTestResult):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.test_timings = []
+
+    def addSuccess(self, test):
+        if getattr(test, "started_at"):
+            elapsed = time.perf_counter() - test.started_at
+            name = self.getDescription(test)
+            self.test_timings.append((name, elapsed))
+            setattr(test, "started_at", None)
+        super().addSuccess(test)
+
+    def getTestTimings(self):
+        return self.test_timings
+
+
+class TimeLoggingTestRunner(unittest.TextTestRunner):
+
+    def __init__(self, *args, **kwargs):
+        return super().__init__(resultclass=TimeLoggingTestResult, *args, **kwargs)
+
+    def run(self, test):
+        result = super().run(test)
+        self.stream.writeln("\nTiming Results:")
+        for name, elapsed in result.getTestTimings():
+            self.stream.writeln(f"({round(elapsed * 1_000, 1)}ms) {name}")
+        return result
+
+
 def run_test_cases():
-    unittest.main(testRunner=unittest.TextTestRunner(verbosity=2))
+    unittest.main(testRunner=TimeLoggingTestRunner(verbosity=2))
 
 
 def skip_soda_tests():
@@ -572,6 +606,10 @@ class FullCodeErrorContextManager:
 
 class BaseTestCase(unittest.TestCase):
     requires_connection = True
+    started_at = None
+
+    def set_started_at(self):
+        self.started_at = time.perf_counter()
 
     def assertParseCount(self, n):
         self.assertEqual(self.parse_count_info.get_value(), n)
@@ -698,6 +736,10 @@ class BaseTestCase(unittest.TestCase):
 
 class BaseAsyncTestCase(unittest.IsolatedAsyncioTestCase):
     requires_connection = True
+    started_at = None
+
+    def set_started_at(self):
+        self.started_at = time.perf_counter()
 
     async def assertParseCount(self, n):
         self.assertEqual(await self.parse_count_info.get_value_async(), n)

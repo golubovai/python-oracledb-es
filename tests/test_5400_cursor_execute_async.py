@@ -596,6 +596,13 @@ class TestCase(test_env.BaseAsyncTestCase):
         with self.assertRaisesFullCode("ORA-01403"):
             await self.cursor.execute("begin raise no_data_found; end;")
 
+    async def test_bench_5436(self):
+        "bench_5436 - benchmark execution of string reading"
+        self.set_started_at()
+        await self.cursor.execute(
+            "select dbms_random.string('x', 10) from dual connect by level <= 50000"
+        )
+        self.assertEqual(len(await self.cursor.fetchall()), 50000)
 
 if __name__ == "__main__":
     test_env.run_test_cases()
