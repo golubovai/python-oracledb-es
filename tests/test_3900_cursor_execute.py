@@ -561,8 +561,8 @@ class TestCase(test_env.BaseTestCase):
         with self.assertRaisesFullCode("ORA-01403"):
             self.cursor.execute("begin raise no_data_found; end;")
 
-    def test_bench_3936(self):
-        "bench_3936 - benchmark execution of string read"
+    def test_bench_1(self):
+        "bench_1 - benchmark execution of string read"
         self.set_started_at()
         self.cursor.execute(
             "select dbms_random.string('x', 10) from dual connect by level <= 50000"
