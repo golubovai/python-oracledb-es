@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (c) 2021, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2024, Oracle and/or its affiliates.
 #
 # This software is dual-licensed to you under the Universal Permissive License
 # (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
@@ -23,11 +23,42 @@
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# version.py
+# write_csv_async.py
 #
-# Defines the version of the package. This is the only place where this is
-# found. The setup.cfg configuration file and the documentation configuration
-# file doc/src/conf.py both reference this file directly.
+# An asynchronous version of write_csv.py
+#
+# A sample showing one way of writing CSV data.
 # -----------------------------------------------------------------------------
 
-__version__ = "2.4.0b1"
+import asyncio
+import csv
+
+import oracledb
+import sample_env
+
+# CSV file to create
+FILE_NAME = "sample.csv"
+
+
+async def main():
+    connection = await oracledb.connect_async(
+        user=sample_env.get_main_user(),
+        password=sample_env.get_main_password(),
+        dsn=sample_env.get_connect_string(),
+    )
+
+    with connection.cursor() as cursor:
+        cursor.arraysize = 1000  # tune this for large queries
+        print(f"Writing to {FILE_NAME}")
+        with open(FILE_NAME, "w") as f:
+            writer = csv.writer(
+                f, lineterminator="\n", quoting=csv.QUOTE_NONNUMERIC
+            )
+            await cursor.execute(
+                """select rownum, sysdate, mycol from BigTab"""
+            )
+            writer.writerow(info.name for info in cursor.description)
+            writer.writerows(await cursor.fetchall())
+
+
+asyncio.run(main())

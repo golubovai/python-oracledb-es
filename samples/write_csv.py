@@ -1,5 +1,5 @@
 # -----------------------------------------------------------------------------
-# Copyright (c) 2021, 2024, Oracle and/or its affiliates.
+# Copyright (c) 2024, Oracle and/or its affiliates.
 #
 # This software is dual-licensed to you under the Universal Permissive License
 # (UPL) 1.0 as shown at https://oss.oracle.com/licenses/upl and Apache License
@@ -23,11 +23,37 @@
 # -----------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------
-# version.py
+# write_csv.py
 #
-# Defines the version of the package. This is the only place where this is
-# found. The setup.cfg configuration file and the documentation configuration
-# file doc/src/conf.py both reference this file directly.
+# A sample showing one way of writing CSV data.
 # -----------------------------------------------------------------------------
 
-__version__ = "2.4.0b1"
+import csv
+
+import oracledb
+import sample_env
+
+# determine whether to use python-oracledb thin mode or thick mode
+if not sample_env.get_is_thin():
+    oracledb.init_oracle_client(lib_dir=sample_env.get_oracle_client())
+
+# CSV file to create
+FILE_NAME = "sample.csv"
+
+
+connection = oracledb.connect(
+    user=sample_env.get_main_user(),
+    password=sample_env.get_main_password(),
+    dsn=sample_env.get_connect_string(),
+)
+
+with connection.cursor() as cursor:
+    cursor.arraysize = 1000  # tune this for large queries
+    print(f"Writing to {FILE_NAME}")
+    with open(FILE_NAME, "w") as f:
+        writer = csv.writer(
+            f, lineterminator="\n", quoting=csv.QUOTE_NONNUMERIC
+        )
+        cursor.execute("""select rownum, sysdate, mycol from BigTab""")
+        writer.writerow(info.name for info in cursor.description)
+        writer.writerows(cursor)

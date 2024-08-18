@@ -11,8 +11,59 @@ Release changes are listed as affecting Thin Mode (the default runtime behavior
 of python-oracledb), as affecting the optional :ref:`Thick Mode
 <enablingthick>`, or as being 'Common' for changes that impact both modes.
 
-oracledb 2.3.0 (TBD)
+oracledb 2.4.0 (TBD)
 --------------------
+
+Thin Mode Changes
++++++++++++++++++
+
+#)  Fixed bug resulting in a segfault when a closed cursor is bound as a REF
+    CURSOR
+    (`issue 368 <https://github.com/oracle/python-oracledb/issues/368>`__).
+#)  Fixed bug resulting in an inability to connect to Oracle Database 23ai
+    instances which have fast authentication disabled.
+#)  Reworked connection string parser:
+
+    - Fixed parsing an :ref:`Easy Connect <easyconnect>` string starting
+      with "`//`" (`issue 352
+      <https://github.com/oracle/python-oracledb/issues/352>`__).
+    - Fixed parsing an Easy Connect string with multiple hosts (a comma for
+      multiple addresses and a semicolon for multiple address lists).
+    - Fixed parsing an Easy Connect string with a static IPv6 address.
+    - Improved error when a connect descriptor parameter like DESCRIPTION or
+      ADDRESS incorrectly contains a simple value instead of nested values.
+
+#)  Reworked :ref:`tnsnames.ora<optnetfiles>` file parser to handle multiple
+    aliases found on separate lines (`issue 362
+    <https://github.com/oracle/python-oracledb/issues/362>`__).
+
+
+Thick Mode Changes
+++++++++++++++++++
+
+#)  Variables containing cursors, LOBs or DbObject values now return the same
+    instances when calling :meth:`Variable.getvalue()`, matching Thin mode
+    behavior. Previously, new instances were created for each call in Thick
+    mode.
+
+Common Changes
+++++++++++++++
+
+#)  Added support for Python 3.13 and dropped support for Python 3.7.
+#)  Attribute :data:`ConnectionPool.getmode` is now one of the values of the
+    enumeration :ref:`connection pool get modes <connpoolmodes>` in order to be
+    consistent with the other uses of this attribute.
+#)  Error ``DPY-3027: binding a cursor from a different connection is not
+    supported`` is now raised when attempting to bind a cursor created on a
+    different connection. Previously, the attempt may have succeeded or may
+    have failed with a number of different unexpected exceptions.
+#)  Error ``DPY-1006: cursor is not open`` is now raised consistently when
+    attempting to bind a closed cursor. Previously, thin mode would result in a
+    segfault and thick mode would result in unusual errors.
+
+
+oracledb 2.3.0 (July 2024)
+--------------------------
 
 Thin Mode Changes
 +++++++++++++++++
@@ -43,6 +94,8 @@ Thick Mode Changes
 Common Changes
 ++++++++++++++
 
+#)  Added support for Oracle Database 23ai
+    :ref:`BINARY vector format <binaryformat>`.
 #)  Replaced integer constants for
     :ref:`connection authorization modes <connection-authorization-modes>`,
     :ref:`connection pool get modes <connpoolmodes>`,

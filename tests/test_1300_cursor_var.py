@@ -230,6 +230,7 @@ class TestCase(test_env.BaseTestCase):
             )
         ref_cursor = var.getvalue()
         self.assertEqual(ref_cursor.fetchall(), [(string_val,)])
+        self.assertIs(var.getvalue(), ref_cursor)
 
     def test_1310(self):
         "1310 - bind a REF cursor but never open it"
@@ -399,6 +400,64 @@ class TestCase(test_env.BaseTestCase):
                 (1315, "String 1315"),
             ],
         )
+
+    def test_1316(self):
+        "1316 - test using a closed ref cursor for OUT bind"
+        value = "test 1316a"
+        sql = """
+            declare
+                t_Cursor sys_refcursor;
+            begin
+                open t_Cursor for
+                    select :value
+                    from dual;
+                :cursor := t_Cursor;
+            end;
+        """
+        var = self.cursor.var(oracledb.DB_TYPE_CURSOR)
+        self.cursor.execute(sql, [value, var])
+        ref_cursor = var.getvalue()
+        self.assertEqual(ref_cursor.fetchall(), [(value,)])
+        ref_cursor.close()
+        with self.assertRaisesFullCode("DPY-1006"):
+            self.cursor.execute(sql, [value, var])
+
+    def test_1317(self):
+        "1317 - test binding a closed cursor"
+        ref_cursor = self.conn.cursor()
+        ref_cursor.close()
+        with self.assertRaisesFullCode("DPY-1006"):
+            self.cursor.callfunc(
+                "pkg_testRefCursors.TestInCursor", str, [ref_cursor]
+            )
+
+    def test_1318(self):
+        "1318 - test ref cursor doesn't work after connection is closed"
+        conn = test_env.get_connection()
+        cursor = conn.cursor()
+        var = cursor.var(oracledb.DB_TYPE_CURSOR)
+        cursor.callproc("myrefcursorproc", [var])
+        conn.close()
+        with self.assertRaisesFullCode("DPY-1001"):
+            ref_cursor = var.getvalue()
+            ref_cursor.fetchall()
+
+    def test_1319(self):
+        "1319 - test binding cursor that is not from the same connection"
+        sql = """
+            declare
+                t_Cursor sys_refcursor;
+            begin
+                open t_Cursor for
+                    select 1319
+                    from dual;
+                :cursor := t_Cursor;
+            end;
+        """
+        conn = test_env.get_connection()
+        ref_cursor = conn.cursor()
+        with self.assertRaisesFullCode("DPY-3027"):
+            self.cursor.execute(sql, [ref_cursor])
 
 
 if __name__ == "__main__":
