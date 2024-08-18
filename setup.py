@@ -27,6 +27,7 @@ import platform
 import sys
 import sysconfig
 from setuptools import setup, Extension
+from Cython.Build import cythonize
 
 # base source directory
 source_dir = os.path.join("src", "oracledb")
@@ -86,18 +87,30 @@ if sys.platform == "darwin":
             target = "x86_64-apple-macos"
         extra_compile_args.extend(["-target", target])
 
-setup(
-    ext_modules=[
+# Environment variable to determine whether or not to enable tracing in Cython modules.
+cython_tracing = os.environ.get("PYO_CYTHON_TRACING", False)
+
+define_macros=()
+cython_compiler_directives={}
+
+if cython_tracing:
+    define_macros = define_macros + [('CYTHON_TRACE_NOGIL', 1)]
+    cython_compiler_directives['linetrace'] = True
+    
+
+extensions = [
         Extension(
             "oracledb.base_impl",
             sources=["src/oracledb/base_impl.pyx"],
             depends=base_depends,
+            define_macros=define_macros,
             extra_compile_args=extra_compile_args,
         ),
         Extension(
             "oracledb.thin_impl",
             sources=["src/oracledb/thin_impl.pyx"],
             depends=thin_depends,
+            define_macros=define_macros,
             extra_compile_args=extra_compile_args,
         ),
         Extension(
@@ -105,7 +118,12 @@ setup(
             sources=["src/oracledb/thick_impl.pyx"],
             include_dirs=["src/oracledb/impl/thick/odpi/include"],
             depends=thick_depends,
+            define_macros=define_macros,
             extra_compile_args=extra_compile_args,
         ),
     ]
+
+setup(
+    ext_modules=cythonize(extensions, 
+                          compiler_directives=cython_compiler_directives)
 )

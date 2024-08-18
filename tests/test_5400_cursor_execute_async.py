@@ -600,9 +600,9 @@ class TestCase(test_env.BaseAsyncTestCase):
         "bench_1 - benchmark execution of string read"
         self.set_started_at()
         await self.cursor.execute(
-            "select dbms_random.string('x', 10) from dual connect by level <= 50000"
+            "select dbms_random.string('x', 10) from dual connect by level <= 500000"
         )
-        self.assertEqual(len(await self.cursor.fetchall()), 50000)
+        self.assertEqual(len(await self.cursor.fetchall()), 500000)
 
 if __name__ == "__main__":
     test_env.run_test_cases()

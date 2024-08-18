@@ -565,9 +565,9 @@ class TestCase(test_env.BaseTestCase):
         "bench_1 - benchmark execution of string read"
         self.set_started_at()
         self.cursor.execute(
-            "select dbms_random.string('x', 10) from dual connect by level <= 50000"
+            "select dbms_random.string('x', 10) from dual connect by level <= 500000"
         )
-        self.assertEqual(len(self.cursor.fetchall()), 50000)
+        self.assertEqual(len(self.cursor.fetchall()), 500000)
 
 if __name__ == "__main__":
     test_env.run_test_cases()

@@ -66,6 +66,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import inspect
 import getpass
 import os
 import sys
@@ -487,7 +488,10 @@ class TimeLoggingTestRunner(unittest.TextTestRunner):
 
 
 def run_test_cases():
-    unittest.main(testRunner=TimeLoggingTestRunner(verbosity=2))
+    frame=inspect.currentframe()
+    frame=frame.f_back
+    module, _ = os.path.splitext(os.path.basename(frame.f_code.co_filename))
+    unittest.main(module=module, testRunner=TimeLoggingTestRunner(verbosity=2))
 
 
 def skip_soda_tests():
