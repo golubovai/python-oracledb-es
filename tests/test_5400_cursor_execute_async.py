@@ -598,7 +598,7 @@ class TestCase(test_env.BaseAsyncTestCase):
 
     async def test_bench_1(self):
         "bench_1 - benchmark execution of string read"
-        self.set_started_at()
+        self.set_bench()
         await self.cursor.execute(
             "select dbms_random.string('x', 10) from dual connect by level <= 50000"
         )

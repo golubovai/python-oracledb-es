@@ -563,7 +563,7 @@ class TestCase(test_env.BaseTestCase):
 
     def test_bench_1(self):
         "bench_1 - benchmark execution of string read"
-        self.set_started_at()
+        self.set_bench()
         self.cursor.execute(
             "select dbms_random.string('x', 10) from dual connect by level <= 50000"
         )

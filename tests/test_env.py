@@ -75,6 +75,7 @@ import time
 import oracledb
 
 oracledb.defaults.config_dir = os.getenv('TNS_ADMIN')
+print(f'oracledb: {oracledb.__version__}')
 
 # Python 3.7 doesn't have support for testing asyncio so fake it to avoid the
 # entire test suite failing!
@@ -462,11 +463,11 @@ class TimeLoggingTestResult(unittest.TextTestResult):
         self.test_timings = []
 
     def addSuccess(self, test):
-        if getattr(test, "started_at"):
-            elapsed = time.perf_counter() - test.started_at
-            name = self.getDescription(test)
-            self.test_timings.append((name, elapsed))
-            setattr(test, "started_at", None)
+        if hasattr(test, "bench_elapsed"):
+            if ela := test.bench_elapsed():
+                name = self.getDescription(test)
+                self.test_timings.append((name, ela))
+                setattr(test, "_bench_started", None)
         super().addSuccess(test)
 
     def getTestTimings(self):
@@ -480,9 +481,11 @@ class TimeLoggingTestRunner(unittest.TextTestRunner):
 
     def run(self, test):
         result = super().run(test)
-        self.stream.writeln("\nTiming Results:")
-        for name, elapsed in result.getTestTimings():
-            self.stream.writeln(f"({round(elapsed * 1_000, 1)}ms) {name}")
+        timings = result.getTestTimings()
+        if timings:
+            self.stream.writeln("\nTiming Results:")
+            for name, elapsed in timings:
+                self.stream.writeln(f"({round(elapsed * 1_000, 1)}ms) {name}")
         return result
 
 
@@ -606,10 +609,23 @@ class FullCodeErrorContextManager:
 
 class BaseTestCase(unittest.TestCase):
     requires_connection = True
-    started_at = None
+    _bench_started: int = None
+    _bench_iters: int = 1
 
-    def set_started_at(self):
-        self.started_at = time.perf_counter()
+    def set_bench(self, iters: int = 1):
+        self._bench_started = time.perf_counter_ns()
+        self._bench_iters = iters
+
+    def bench_started(self) -> int:
+        return self._bench_started
+
+    def bench_iters(self) -> int:
+        return self._bench_iters
+
+    def bench_elapsed(self):
+        if not self._bench_started:
+            return None
+        return (time.perf_counter_ns() - self._bench_started) / self._bench_iters / 1e9
 
     def assertParseCount(self, n):
         self.assertEqual(self.parse_count_info.get_value(), n)
@@ -736,10 +752,23 @@ class BaseTestCase(unittest.TestCase):
 
 class BaseAsyncTestCase(unittest.IsolatedAsyncioTestCase):
     requires_connection = True
-    started_at = None
+    _bench_started: int = None
+    _bench_iters: int = 1
 
-    def set_started_at(self):
-        self.started_at = time.perf_counter()
+    def set_bench(self, iters: int = 1):
+        self._bench_started = time.perf_counter_ns()
+        self._bench_iters = iters
+
+    def bench_started(self) -> int:
+        return self._bench_started
+
+    def bench_iters(self) -> int:
+        return self._bench_iters
+
+    def bench_elapsed(self):
+        if not self._bench_started:
+            return None
+        return (time.perf_counter_ns() - self._bench_started) / self._bench_iters / 1e9
 
     async def assertParseCount(self, n):
         self.assertEqual(await self.parse_count_info.get_value_async(), n)

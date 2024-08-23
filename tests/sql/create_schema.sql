@@ -438,9 +438,10 @@ declare
     begin
         for i in 1..length(a_Value) loop
             t_Digit := ascii(substr(a_Value, i, 1));
-            t_HexValue := t_HexValue ||
-                    ConvertHexDigit(trunc(t_Digit / 16)) ||
-                    ConvertHexDigit(mod(t_Digit, 16));
+            while (t_Digit > 1) loop
+              t_HexValue := ConvertHexDigit(mod(t_Digit, 16)) || t_HexValue;
+              t_Digit := trunc(t_Digit / 16);
+            end loop;
         end loop;
         return t_HexValue;
     end;
