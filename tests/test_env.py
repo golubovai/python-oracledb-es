@@ -66,6 +66,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+import inspect
 import getpass
 import os
 import sys
@@ -227,7 +228,7 @@ def get_client_version():
     value = PARAMETERS.get(name)
     if value is None:
         if get_is_thin():
-            value = (23, 4)
+            value = (23, 5)
         else:
             oracledb.init_oracle_client()
             value = oracledb.clientversion()[:2]
@@ -490,7 +491,10 @@ class TimeLoggingTestRunner(unittest.TextTestRunner):
 
 
 def run_test_cases():
-    unittest.main(testRunner=TimeLoggingTestRunner(verbosity=2))
+    frame=inspect.currentframe()
+    frame=frame.f_back
+    module, _ = os.path.splitext(os.path.basename(frame.f_code.co_filename))
+    unittest.main(module=module, testRunner=TimeLoggingTestRunner(verbosity=2))
 
 
 def skip_soda_tests():

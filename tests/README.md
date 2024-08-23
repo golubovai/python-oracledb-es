@@ -25,6 +25,16 @@ This directory contains the test suite for python-oracledb.
 
         python test_1000_module.py
 
+    You may also run each of the test scripts (or individual test) with cProfiler:
+
+        python -m cProfile -o data.pprof ttest_1000_module.py -k test_1000
+
+    And when use snakeviz to vizualize profile data:
+       
+        python -m snakeviz data.pprof
+
+    To profile cython code pass set environment variable PYO_CYTHON_TRACING=True
+
 3.  After running the test suite, the schemas can be dropped by running the
     Python script [drop_schema.py][3]. The script requires administrative
     privileges and will prompt for these credentials as well as the names of

@@ -133,6 +133,9 @@ cdef class BaseConnImpl:
                 return value
         elif db_type_num == DB_TYPE_NUM_CURSOR:
             if isinstance(value, (PY_TYPE_CURSOR, PY_TYPE_ASYNC_CURSOR)):
+                value._verify_open()
+                if value.connection._impl is not self:
+                    errors._raise_err(errors.ERR_CURSOR_DIFF_CONNECTION)
                 return value
         elif db_type_num == DB_TYPE_NUM_BOOLEAN:
             return bool(value)
@@ -144,7 +147,7 @@ cdef class BaseConnImpl:
                     errors._raise_err(errors.ERR_INVALID_VECTOR)
                 return array.array('d', value)
             elif isinstance(value, array.array) \
-                    and value.typecode in ('f', 'd', 'b'):
+                    and value.typecode in ('f', 'd', 'b', 'B'):
                 if len(value) == 0:
                     errors._raise_err(errors.ERR_INVALID_VECTOR)
                 return value

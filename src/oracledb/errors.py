@@ -247,8 +247,8 @@ ERR_MISSING_TYPE_NAME_FOR_OBJECT_VAR = 2037
 ERR_INVALID_COLL_INDEX_GET = 2038
 ERR_INVALID_COLL_INDEX_SET = 2039
 ERR_EXECUTE_MODE_ONLY_FOR_DML = 2040
-ERR_MISSING_QUOTE_IN_STRING = 2041
-ERR_MISSING_QUOTE_IN_IDENTIFIER = 2042
+ERR_MISSING_ENDING_SINGLE_QUOTE = 2041
+ERR_MISSING_ENDING_DOUBLE_QUOTE = 2042
 ERR_DBOBJECT_ATTR_MAX_SIZE_VIOLATED = 2043
 ERR_DBOBJECT_ELEMENT_MAX_SIZE_VIOLATED = 2044
 ERR_INVALID_ARRAYSIZE = 2045
@@ -286,6 +286,7 @@ ERR_VECTOR_VERSION_NOT_SUPPORTED = 3023
 ERR_VECTOR_FORMAT_NOT_SUPPORTED = 3024
 ERR_OPERATION_NOT_SUPPORTED_ON_BFILE = 3025
 ERR_OPERATION_ONLY_SUPPORTED_ON_BFILE = 3026
+ERR_CURSOR_DIFF_CONNECTION = 3027
 
 # error numbers that result in DatabaseError
 ERR_TNS_ENTRY_NOT_FOUND = 4000
@@ -329,7 +330,6 @@ ERR_UNEXPECTED_DATA = 5004
 ERR_UNEXPECTED_REFUSE = 5005
 ERR_UNEXPECTED_END_OF_DATA = 5006
 ERR_UNEXPECTED_XML_TYPE = 5007
-ERR_TOO_MANY_CURSORS_TO_CLOSE = 5008
 ERR_UNKNOWN_SERVER_PIGGYBACK = 5009
 ERR_UNKNOWN_TRANSACTION_STATE = 5010
 
@@ -349,8 +349,8 @@ ERR_ORACLE_ERROR_XREF = {
     28: ERR_CONNECTION_CLOSED,
     600: ERR_CONNECTION_CLOSED,
     1005: ERR_NO_CREDENTIALS,
-    1740: ERR_MISSING_QUOTE_IN_IDENTIFIER,
-    1756: ERR_MISSING_QUOTE_IN_STRING,
+    1740: ERR_MISSING_ENDING_DOUBLE_QUOTE,
+    1756: ERR_MISSING_ENDING_SINGLE_QUOTE,
     22165: (
         ERR_INVALID_COLL_INDEX_SET,
         r"index \[(?P<index>\d+)\] must be in the range of "
@@ -475,6 +475,9 @@ ERR_MESSAGE_FORMATS = {
         "cannot connect to database (CONNECTION_ID={connection_id})."
     ),
     ERR_CONTENT_INVALID_AFTER_NUMBER: "invalid number (content after number)",
+    ERR_CURSOR_DIFF_CONNECTION: (
+        "binding a cursor from a different connection is not supported"
+    ),
     ERR_CURSOR_NOT_OPEN: "cursor is not open",
     ERR_CURSOR_HAS_BEEN_CLOSED: "cursor has been closed by the database",
     ERR_DBOBJECT_ATTR_MAX_SIZE_VIOLATED: (
@@ -607,8 +610,8 @@ ERR_MESSAGE_FORMATS = {
         "not provided"
     ),
     ERR_MISSING_FILE: "file '{file_name}' is missing or unreadable",
-    ERR_MISSING_QUOTE_IN_IDENTIFIER: 'missing ending quote (") in identifier',
-    ERR_MISSING_QUOTE_IN_STRING: "missing ending quote (') in string",
+    ERR_MISSING_ENDING_DOUBLE_QUOTE: 'missing ending quote (")',
+    ERR_MISSING_ENDING_SINGLE_QUOTE: "missing ending quote (')",
     ERR_MISSING_TYPE_NAME_FOR_OBJECT_VAR: (
         "no object type specified for object variable"
     ),
@@ -688,9 +691,6 @@ ERR_MESSAGE_FORMATS = {
         "Oracle Database does not support time only variables"
     ),
     ERR_TNS_ENTRY_NOT_FOUND: 'unable to find "{name}" in {file_name}',
-    ERR_TOO_MANY_CURSORS_TO_CLOSE: (
-        "internal error: attempt to close more than {num_cursors} cursors"
-    ),
     ERR_TOO_MANY_BATCH_ERRORS: (
         "the number of batch errors from executemany() exceeds 65535"
     ),

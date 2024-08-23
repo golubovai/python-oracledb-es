@@ -69,10 +69,6 @@ cdef class Capabilities:
         if server_caps[TNS_CCAP_FIELD_VERSION] < self.ttc_field_version:
             self.ttc_field_version = server_caps[TNS_CCAP_FIELD_VERSION]
             self.compile_caps[TNS_CCAP_FIELD_VERSION] = self.ttc_field_version
-        if self.ttc_field_version < TNS_CCAP_FIELD_VERSION_23_4 \
-                and self.supports_end_of_response:
-            self.compile_caps[TNS_CCAP_TTC4] ^= TNS_CCAP_END_OF_RESPONSE
-            self.supports_end_of_response = False
 
     @cython.boundscheck(False)
     cdef void _adjust_for_server_runtime_caps(self, bytearray server_caps):
@@ -126,6 +122,8 @@ cdef class Capabilities:
         self.compile_caps[TNS_CCAP_CLIENT_FN] = TNS_CCAP_CLIENT_FN_MAX
         self.compile_caps[TNS_CCAP_TTC4] = TNS_CCAP_INBAND_NOTIFICATION
         self.compile_caps[TNS_CCAP_TTC5] = TNS_CCAP_VECTOR_SUPPORT
+        self.compile_caps[TNS_CCAP_VECTOR_FEATURES] = \
+                TNS_CCAP_VECTOR_FEATURE_BINARY
 
     @cython.boundscheck(False)
     cdef void _init_runtime_caps(self):
